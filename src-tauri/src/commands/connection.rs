@@ -165,18 +165,19 @@ async fn test_db_connection(
 
 #[allow(dead_code)]
 async fn test_mysql_connection(config: DbConfig) -> Result<bool, String> {
-    use sqlx::mysql::MySqlPoolOptions;
+    use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions};
 
-    let url = format!(
-        "mysql://{}:{}@{}:{}{}",
-        config.username,
-        config.password,
-        config.host,
-        config.port,
-        config.database.as_ref().map(|d| format!("/{}", d)).unwrap_or_default()
-    );
+    let mut options = MySqlConnectOptions::new()
+        .host(&config.host)
+        .port(config.port)
+        .username(&config.username)
+        .password(&config.password);
 
-    match MySqlPoolOptions::new().max_connections(1).connect(&url).await {
+    if let Some(database) = config.database.as_deref() {
+        options = options.database(database);
+    }
+
+    match MySqlPoolOptions::new().max_connections(1).connect_with(options).await {
         Ok(pool) => {
             let result = sqlx::query("SELECT 1").fetch_one(&pool).await.is_ok();
             pool.close().await;
@@ -188,18 +189,20 @@ async fn test_mysql_connection(config: DbConfig) -> Result<bool, String> {
 
 #[allow(dead_code)]
 async fn test_postgres_connection(config: DbConfig) -> Result<bool, String> {
-    use sqlx::postgres::PgPoolOptions;
+    use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
 
-    let url = format!(
-        "postgres://{}:{}@{}:{}{}?sslmode=prefer",
-        config.username,
-        config.password,
-        config.host,
-        config.port,
-        config.database.as_ref().map(|d| format!("/{}", d)).unwrap_or_default()
-    );
+    let mut options = PgConnectOptions::new()
+        .host(&config.host)
+        .port(config.port)
+        .username(&config.username)
+        .password(&config.password)
+        .ssl_mode(PgSslMode::Prefer);
 
-    match PgPoolOptions::new().max_connections(1).connect(&url).await {
+    if let Some(database) = config.database.as_deref() {
+        options = options.database(database);
+    }
+
+    match PgPoolOptions::new().max_connections(1).connect_with(options).await {
         Ok(pool) => {
             let result = sqlx::query("SELECT 1").fetch_one(&pool).await.is_ok();
             pool.close().await;

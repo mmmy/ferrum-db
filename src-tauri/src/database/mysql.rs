@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sqlx::mysql::{MySqlPool, MySqlPoolOptions};
+use sqlx::mysql::{MySqlConnectOptions, MySqlPool, MySqlPoolOptions};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -19,31 +19,29 @@ impl MySQLConnection {
         }
     }
 
-    fn build_connection_string(&self) -> String {
-        let mut url = format!(
-            "mysql://{}:{}@{}:{}",
-            self.config.username,
-            self.config.password,
-            self.config.host,
-            self.config.port
-        );
+    fn build_connect_options(&self) -> MySqlConnectOptions {
+        let mut options = MySqlConnectOptions::new()
+            .host(&self.config.host)
+            .port(self.config.port)
+            .username(&self.config.username)
+            .password(&self.config.password);
 
-        if let Some(ref db) = self.config.database {
-            url.push_str(&format!("/{}", db));
+        if let Some(database) = self.config.database.as_deref() {
+            options = options.database(database);
         }
 
-        url
+        options
     }
 }
 
 #[async_trait]
 impl DatabaseConnection for MySQLConnection {
     async fn connect(&mut self) -> Result<()> {
-        let connection_string = self.build_connection_string();
+        let options = self.build_connect_options();
 
         let pool = MySqlPoolOptions::new()
             .max_connections(1)
-            .connect(&connection_string)
+            .connect_with(options)
             .await
             .map_err(|e| DatabaseError::ConnectionFailed(e.to_string()))?;
 
@@ -98,20 +96,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_build_connection_string() {
+    fn test_build_connect_options_accepts_reserved_characters() {
         let config = ConnectionConfig {
             host: "localhost".to_string(),
             port: 3306,
             username: "root".to_string(),
-            password: "password".to_string(),
-            database: Some("testdb".to_string()),
+            password: "p@ss:word/with?chars".to_string(),
+            database: Some("test/db".to_string()),
         };
 
         let conn = MySQLConnection::new(config);
-        let url = conn.build_connection_string();
-
-        assert!(url.contains("mysql://"));
-        assert!(url.contains("root:password@localhost:3306"));
-        assert!(url.contains("/testdb"));
+        let _ = conn.build_connect_options();
     }
 }

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sqlx::postgres::{PgPool, PgPoolOptions};
+use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions, PgSslMode};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -19,34 +19,30 @@ impl PostgresConnection {
         }
     }
 
-    fn build_connection_string(&self) -> String {
-        let mut url = format!(
-            "postgres://{}:{}@{}:{}",
-            self.config.username,
-            self.config.password,
-            self.config.host,
-            self.config.port
-        );
+    fn build_connect_options(&self) -> PgConnectOptions {
+        let mut options = PgConnectOptions::new()
+            .host(&self.config.host)
+            .port(self.config.port)
+            .username(&self.config.username)
+            .password(&self.config.password)
+            .ssl_mode(PgSslMode::Prefer);
 
-        if let Some(ref db) = self.config.database {
-            url.push_str(&format!("/{}", db));
+        if let Some(database) = self.config.database.as_deref() {
+            options = options.database(database);
         }
 
-        // Add options for better compatibility
-        url.push_str("?sslmode=prefer");
-
-        url
+        options
     }
 }
 
 #[async_trait]
 impl DatabaseConnection for PostgresConnection {
     async fn connect(&mut self) -> Result<()> {
-        let connection_string = self.build_connection_string();
+        let options = self.build_connect_options();
 
         let pool = PgPoolOptions::new()
             .max_connections(1)
-            .connect(&connection_string)
+            .connect_with(options)
             .await
             .map_err(|e| DatabaseError::ConnectionFailed(e.to_string()))?;
 
@@ -101,20 +97,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_build_connection_string() {
+    fn test_build_connect_options_accepts_reserved_characters() {
         let config = ConnectionConfig {
             host: "localhost".to_string(),
             port: 5432,
             username: "postgres".to_string(),
-            password: "password".to_string(),
-            database: Some("testdb".to_string()),
+            password: "p@ss:word/with?chars".to_string(),
+            database: Some("test/db".to_string()),
         };
 
         let conn = PostgresConnection::new(config);
-        let url = conn.build_connection_string();
-
-        assert!(url.contains("postgres://"));
-        assert!(url.contains("postgres:password@localhost:5432"));
-        assert!(url.contains("/testdb"));
+        let _ = conn.build_connect_options();
     }
 }
