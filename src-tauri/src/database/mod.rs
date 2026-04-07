@@ -1,2 +1,7 @@
-// Database connection module - Phase 4
-// Placeholder for I9, I10, I11
+pub mod errors;
+pub mod traits;
+pub mod mysql;
+pub mod postgres;
+
+pub use errors::{DatabaseError, Result};
+pub use traits::{ConnectionConfig, DatabaseConnection};
