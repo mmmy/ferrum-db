@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#262626",
+                        "on-secondary-fixed": "#4f3a07",
+                        "primary-dim": "#569fff",
+                        "on-surface-variant": "#adabaa",
+                        "secondary-fixed": "#fddc9a",
+                        "surface-container-high": "#1f2020",
+                        "on-tertiary-fixed-variant": "#79000e",
+                        "primary": "#79b0ff",
+                        "inverse-surface": "#fcf9f8",
+                        "primary-fixed-dim": "#3794ff",
+                        "on-primary-container": "#002348",
+                        "secondary-dim": "#eece8d",
+                        "tertiary-fixed-dim": "#ff7b74",
+                        "on-tertiary": "#490005",
+                        "on-error": "#490006",
+                        "on-tertiary-container": "#1f0001",
+                        "tertiary-fixed": "#ff928b",
+                        "on-primary": "#002e5c",
+                        "tertiary": "#ff716b",
+                        "on-secondary-container": "#eccc8c",
+                        "on-tertiary-fixed": "#3a0003",
+                        "error-dim": "#d7383b",
+                        "primary-fixed": "#5ca2ff",
+                        "on-secondary": "#634d19",
+                        "on-error-container": "#ffa8a3",
+                        "surface-container-low": "#131313",
+                        "background": "#0e0e0e",
+                        "surface-container": "#191a1a",
+                        "on-background": "#ffffff",
+                        "primary-container": "#5ca2ff",
+                        "tertiary-dim": "#ff716b",
+                        "surface-variant": "#262626",
+                        "inverse-on-surface": "#565555",
+                        "surface-dim": "#0e0e0e",
+                        "on-surface": "#ffffff",
+                        "tertiary-container": "#fe4e4d",
+                        "outline-variant": "#484848",
+                        "surface-tint": "#79b0ff",
+                        "error-container": "#9f0519",
+                        "secondary-container": "#594410",
+                        "inverse-primary": "#005fb2",
+                        "on-secondary-fixed-variant": "#6e5622",
+                        "surface-bright": "#2c2c2c",
+                        "on-primary-fixed-variant": "#002c58",
+                        "surface-container-lowest": "#000000",
+                        "secondary": "#fddc9a",
+                        "secondary-fixed-dim": "#eece8d",
+                        "outline": "#767575",
+                        "surface": "#0e0e0e",
+                        "on-primary-fixed": "#000000",
+                        "error": "#ff716c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 1.25rem;
+        }
+        .canvas-grid {
+            background-image: radial-gradient(circle, #262626 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .table-node {
+            box-shadow: 0 0 0 1px rgba(121, 176, 255, 0.1);
+        }
+        .connection-line {
+            stroke: #484848;
+            stroke-width: 1.5;
+            fill: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface-variant font-body h-screen overflow-hidden flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-4 w-full sticky top-0 z-40 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800/50 h-12 font-['Inter'] font-medium text-sm">
+<div class="flex items-center gap-8">
+<span class="font-['Space_Grotesk'] font-bold text-white text-base">Kinetic Console</span>
+<nav class="flex items-center gap-4">
+<a class="text-neutral-400 hover:text-white transition-all duration-150" href="#">Query</a>
+<a class="text-neutral-400 hover:text-white transition-all duration-150" href="#">Export</a>
+<a class="text-blue-400 border-b-2 border-blue-400 transition-all duration-150" href="#">Schema</a>
+<a class="text-neutral-400 hover:text-white transition-all duration-150" href="#">Logs</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-neutral-800 hover:bg-neutral-700 px-3 py-1 rounded text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">settings_suggest</span>
+</button>
+<button class="bg-primary-container text-on-primary-container px-4 py-1 font-bold text-xs rounded-sm hover:opacity-90 transition-all">
+                Execute
+            </button>
+<div class="h-8 w-8 rounded bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Admin Avatar" class="w-full h-full object-cover" data-alt="close-up portrait of a professional developer avatar with minimalist aesthetic on a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfTDHh34NWfcRHPyCdc5dWC-MrshDXOD1adPOgnDjRLNukea6H7sqQ3oJgv36Ss11khl0QBgUAvU7VEpUZs-BFeZzW3dXs5HBjQN1qsNVYeqx63dHWnnaAcSAb2wRQU73BmRDp9OT2L0uRS9kBRqyKB951fzBChoXQ8rw6VuqjxmRLoNeW2LNv3djLTzyVKMM2TNwttFxD6bNv-uOggji-1wQyJFNfm-AfAl4RcelLeg66eqZ7ByT8GW7_tAZjJm3TAMboF7KODLzC"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full w-64 left-0 sticky top-0 bg-neutral-900 gap-1 font-['Inter'] tracking-tight">
+<div class="p-4 flex flex-col gap-1">
+<div class="text-lg font-black text-white tracking-tighter mb-4">The Kinetic Console</div>
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">Connections</span>
+</button>
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">SQL Editor</span>
+</button>
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">table_rows</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">Data Browser</span>
+</button>
+<button class="flex items-center gap-3 p-2 rounded text-blue-400 bg-neutral-800 border-r-2 border-blue-500 transition-colors duration-150">
+<span class="material-symbols-outlined">schema</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">ER Diagram</span>
+</button>
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">history</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">History</span>
+</button>
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">Settings</span>
+</button>
+</div>
+<div class="mt-auto p-4 flex flex-col gap-1">
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">Docs</span>
+</button>
+<button class="flex items-center gap-3 p-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-['Space_Grotesk'] font-medium text-sm">Help</span>
+</button>
+</div>
+</aside>
+<!-- Main Workspace (Canvas) -->
+<main class="flex-1 relative bg-surface overflow-hidden canvas-grid">
+<!-- Breadcrumb-Path -->
+<div class="absolute top-4 left-6 flex items-center gap-2 bg-surface-container-lowest/80 px-3 py-1.5 backdrop-blur-sm rounded-sm border border-outline-variant/10 font-['JetBrains_Mono'] text-[11px] tracking-tight z-10">
+<span class="text-neutral-500">Cluster</span>
+<span class="text-neutral-700">/</span>
+<span class="text-tertiary">Production</span>
+<span class="text-neutral-700">/</span>
+<span class="text-neutral-500">Databases</span>
+<span class="text-neutral-700">/</span>
+<span class="text-on-surface">inventory_v3</span>
+</div>
+<!-- Floating Toolbar -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center bg-surface-container-high/90 backdrop-blur-xl p-1.5 rounded-lg border border-outline-variant/20 shadow-2xl z-30">
+<div class="flex items-center border-r border-outline-variant/30 pr-1.5 mr-1.5 gap-1">
+<button class="p-2 hover:bg-surface-container-highest rounded text-on-surface-variant hover:text-primary transition-colors" title="Auto-layout">
+<span class="material-symbols-outlined">auto_fix</span>
+</button>
+<button class="p-2 hover:bg-surface-container-highest rounded text-on-surface-variant hover:text-primary transition-colors" title="Zoom In">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+<button class="p-2 hover:bg-surface-container-highest rounded text-on-surface-variant hover:text-primary transition-colors" title="Zoom Out">
+<span class="material-symbols-outlined">zoom_out</span>
+</button>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 hover:bg-surface-container-highest rounded text-on-surface-variant hover:text-primary transition-colors" title="Export">
+<span class="material-symbols-outlined">file_download</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-2 bg-primary-container/20 text-primary hover:bg-primary-container/30 rounded font-['Space_Grotesk'] text-xs font-bold transition-all" title="Sync to Database">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">sync</span>
+                        SYNC TO DB
+                    </button>
+</div>
+</div>
+<!-- ER Canvas Elements -->
+<div class="w-full h-full relative">
+<!-- Relationship Lines (SVG) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<path class="connection-line" d="M 420 220 C 500 220, 500 350, 580 350"></path>
+<circle cx="420" cy="220" fill="#484848" r="3"></circle>
+<text fill="#484848" font-family="Space Grotesk" font-size="10" x="540" y="340">1:N</text>
+<path class="connection-line" d="M 780 400 L 850 400"></path>
+<text fill="#484848" font-family="Space Grotesk" font-size="10" x="810" y="390">1:1</text>
+</svg>
+<!-- Table: Users -->
+<div class="absolute left-100 top-40 w-64 bg-surface-container border-l-4 border-primary shadow-xl rounded-sm table-node group">
+<div class="p-3 bg-surface-container-high flex justify-between items-center">
+<span class="font-['Space_Grotesk'] font-bold text-white text-sm">users</span>
+<span class="text-[10px] text-primary bg-primary/10 px-1 rounded">ENGINE: InnoDB</span>
+</div>
+<div class="p-0 flex flex-col">
+<div class="flex items-center justify-between px-3 py-1.5 bg-surface-container-highest/20 group-hover:bg-surface-container-highest/40 border-b border-outline-variant/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">key</span>
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">id</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">BIGINT</span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5 border-b border-outline-variant/10">
+<div class="flex items-center gap-2 pl-6">
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">email</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">VARCHAR(255)</span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5 border-b border-outline-variant/10">
+<div class="flex items-center gap-2 pl-6">
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">password_hash</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">TEXT</span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5">
+<div class="flex items-center gap-2 pl-6">
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">created_at</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">TIMESTAMP</span>
+</div>
+</div>
+</div>
+<!-- Table: Orders -->
+<div class="absolute left-[580px] top-[300px] w-64 bg-surface-container border-l-4 border-tertiary shadow-xl rounded-sm table-node">
+<div class="p-3 bg-surface-container-high flex justify-between items-center">
+<span class="font-['Space_Grotesk'] font-bold text-white text-sm">orders</span>
+<span class="material-symbols-outlined text-tertiary text-xs">warning</span>
+</div>
+<div class="p-0 flex flex-col">
+<div class="flex items-center justify-between px-3 py-1.5 border-b border-outline-variant/10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">key</span>
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">id</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">UUID</span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5 border-b border-outline-variant/10 bg-primary/5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">link</span>
+<span class="font-['JetBrains_Mono'] text-xs text-primary">user_id</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-primary/70">FK: users.id</span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5 border-b border-outline-variant/10">
+<div class="flex items-center gap-2 pl-6">
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">total_amount</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">DECIMAL(10,2)</span>
+</div>
+<div class="flex items-center justify-between px-3 py-1.5">
+<div class="flex items-center gap-2 pl-6">
+<span class="font-['JetBrains_Mono'] text-xs text-on-surface">status</span>
+</div>
+<span class="font-['JetBrains_Mono'] text-[10px] text-neutral-500">ENUM</span>
+</div>
+</div>
+</div>
+<!-- Table: Payments -->
+<div class="absolute left-[850px] top-[350px] w-56 bg-surface-container border-l-4 border-outline shadow-xl rounded-sm table-node opacity-80">
+<div class="p-3 bg-surface-container-high">
+<span class="font-['Space_Grotesk'] font-bold text-white text-sm">payments</span>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<div class="text-[10px] text-neutral-600 font-['JetBrains_Mono']">-- Empty Table --</div>
+<div class="h-1 w-full bg-neutral-900 rounded-full overflow-hidden mt-2">
+<div class="h-full bg-primary/20 w-1/3"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Sidebar (Properties) -->
+<aside class="w-80 bg-surface-container border-l border-outline-variant/20 flex flex-col z-20 shadow-2xl">
+<div class="p-6 flex flex-col gap-8 h-full">
+<!-- Property Section -->
+<div>
+<h3 class="font-['Space_Grotesk'] text-xs font-bold text-primary tracking-widest uppercase mb-6 flex items-center justify-between">
+                        Table Properties
+                        <span class="material-symbols-outlined text-sm">info</span>
+</h3>
+<div class="space-y-5">
+<div class="flex flex-col gap-2">
+<label class="font-['Space_Grotesk'] text-[10px] text-neutral-500 uppercase tracking-wider">Table Name</label>
+<input class="bg-surface-container-low border-b-2 border-primary text-on-surface font-['JetBrains_Mono'] text-sm px-0 py-2 focus:ring-0 focus:border-primary-dim transition-all outline-none" type="text" value="orders"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-['Space_Grotesk'] text-[10px] text-neutral-500 uppercase tracking-wider">Engine</label>
+<select class="bg-surface-container-low border-none text-on-surface font-['Space_Grotesk'] text-sm py-2 rounded-sm focus:ring-1 focus:ring-primary">
+<option>InnoDB</option>
+<option>MyISAM</option>
+<option>Memory</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-['Space_Grotesk'] text-[10px] text-neutral-500 uppercase tracking-wider">Comments</label>
+<textarea class="bg-surface-container-low border-none text-on-surface font-['Inter'] text-xs py-2 rounded-sm focus:ring-1 focus:ring-primary resize-none" placeholder="Enter table metadata..." rows="3">Stores all customer purchase records with transactional integrity.</textarea>
+</div>
+</div>
+</div>
+<!-- Migration Tool -->
+<div class="mt-auto">
+<div class="bg-surface-container-lowest p-4 rounded-sm border border-outline-variant/10 mb-4">
+<div class="flex items-center justify-between mb-3">
+<span class="text-[10px] font-['Space_Grotesk'] text-tertiary font-bold uppercase">Pending Changes</span>
+<span class="text-[10px] bg-tertiary/10 text-tertiary px-1.5 py-0.5 rounded">MODIFIED</span>
+</div>
+<code class="block font-['JetBrains_Mono'] text-[10px] leading-relaxed text-on-surface-variant overflow-hidden">
+                            ALTER TABLE orders <br/>
+                            ADD COLUMN deleted_at <br/>
+                            TIMESTAMP NULL;
+                        </code>
+</div>
+<button class="w-full py-3 bg-tertiary text-on-tertiary font-['Space_Grotesk'] font-bold text-xs tracking-widest uppercase hover:bg-tertiary-dim transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span>
+                        Generate Migration
+                    </button>
+</div>
+</div>
+</aside>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full h-8 flex items-center justify-between px-6 z-50 bg-black border-t border-red-900/30 font-['JetBrains_Mono'] text-[11px] uppercase tracking-widest text-red-400">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                Environment: Production
+            </div>
+<div class="flex items-center gap-4 text-neutral-600">
+<span class="hover:text-red-300 transition-colors">Lat: 12ms</span>
+<span class="hover:text-red-300 transition-colors">Uptime: 99.9%</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+            AI: Ready
+        </div>
+</footer>
+</body></html>

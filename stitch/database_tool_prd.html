@@ -1,0 +1,69 @@
+# Database Management Tool PRD: Efficient & Lightweight
+
+## 1. Project Overview
+### 1.1 Goal
+Create a cross-platform desktop client that addresses pain points of existing tools (Navicat too heavy, DBeaver UI cluttered).
+
+### 1.2 Core Values
+* **Developer-First**: Native SSH tunnels, custom scripts, and code-level operations.
+* **Extreme Speed**: Fluid UI even with millions of rows.
+* **Modern**: Deep AI SQL assistant integration & ER diagram generation.
+
+---
+
+## 2. Target Users
+* **Backend Engineers**: Debugging SQL, checking structures.
+* **DBAs/Ops**: Monitoring status, migrations.
+* **Full-stack/Frontend**: Visual data editing without complex commands.
+
+---
+
+## 3. Functional Requirements
+### 3.1 Connection & Security
+* **Multi-engine**: PostgreSQL, MySQL, SQLite, MongoDB, Redis, ClickHouse.
+* **Management**: Grouping (Prod, Staging, Dev), color tags.
+* **SSH Tunnels**: Key Pair & Jump Server support.
+* **Isolation**: Forced confirmation or "Read-only" for production.
+
+### 3.2 Intelligent SQL Editor
+* **LSP Integration**: Autocomplete, syntax highlighting.
+* **AI Assistant**: Natural language to SQL, query plan explanation.
+* **Multi-tasking**: Partial code execution, tabbed results.
+* **Explain Visualizer**: Tree view for `EXPLAIN ANALYZE`.
+
+### 3.3 Data Operations & Visualization
+* **Spreadsheet View**: Cell editing, bulk delete, advanced filtering.
+* **ER Diagrams**: One-click generation, drag-and-drop, export to SVG/PDF.
+* **JSON Support**: Hierarchical editor for JSONB fields.
+
+### 3.4 Structure Design
+* **Lossless Modeling**: Graphical schema changes with `ALTER TABLE` previews.
+* **Version Control**: Export migration scripts (Golang-migrate, Alembic).
+
+---
+
+## 4. Non-Functional Requirements
+### 4.1 Performance
+* **Cold Start**: < 2s on Apple Silicon.
+* **Memory**: < 200MB (Non-Electron).
+* **Scrolling**: Virtual lists for millions of rows.
+
+### 4.2 UX
+* **Keyboard-centric**: Command Palette (`Cmd + Shift + P`) like VS Code.
+* **Dark Mode**: High-contrast code area optimization.
+* **Plugin System**: Rust or TS for data simulators/exporters.
+
+---
+
+## 5. Suggested Tech Stack (2026)
+* **UI**: Rust + Tauri.
+* **Backend**: Rust (`sqlx`/`diesel`).
+* **Storage**: SQLite for local configs/history.
+
+---
+
+## 6. Roadmap
+1. **V1.0 (MVP)**: MySQL/PostgreSQL, Basic Query, SSH.
+2. **V1.1**: AI SQL Translator & Perf Tools.
+3. **V1.2**: Redis & Real-time Dashboards.
+4. **V2.0**: Team Collaboration & Cloud Sync.
