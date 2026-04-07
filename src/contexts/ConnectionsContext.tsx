@@ -26,18 +26,27 @@ function connectionsReducer(state: ConnectionsState, action: ConnectionsAction):
     case 'SET_CONNECTIONS':
       return { ...state, connections: action.payload, isLoading: false, error: null };
     case 'ADD_CONNECTION':
-      return { ...state, connections: [...state.connections, action.payload] };
+      return {
+        ...state,
+        connections: [...state.connections, action.payload],
+        isLoading: false,
+        error: null,
+      };
     case 'UPDATE_CONNECTION':
       return {
         ...state,
         connections: state.connections.map((c) =>
           c.id === action.payload.id ? action.payload : c
         ),
+        isLoading: false,
+        error: null,
       };
     case 'DELETE_CONNECTION':
       return {
         ...state,
         connections: state.connections.filter((c) => c.id !== action.payload),
+        isLoading: false,
+        error: null,
       };
     case 'SET_ERROR':
       return { ...state, error: action.payload, isLoading: false };
@@ -87,10 +96,13 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
   const updateConnection = async (id: string, input: UpdateConnectionInput) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const connection = await invoke<Connection>('update_connection', { id, data: input });
+      const connection = await invoke<Connection | null>('update_connection', { id, data: input });
       if (connection) {
         dispatch({ type: 'UPDATE_CONNECTION', payload: connection });
+        return;
       }
+
+      throw new Error('Connection not found');
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: String(error) });
       throw error;

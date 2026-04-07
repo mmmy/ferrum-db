@@ -116,8 +116,17 @@ export function ConnectionForm({ connection, onSubmit, onCancel, isLoading }: Co
           <input
             type="number"
             value={formData.port}
-            onChange={(e) => handleChange('port', parseInt(e.target.value) || 0)}
+            onChange={(e) => {
+              const port = parseInt(e.target.value);
+              if (!isNaN(port) && port >= 1 && port <= 65535) {
+                handleChange('port', port);
+              } else if (e.target.value === '') {
+                handleChange('port', 0);
+              }
+            }}
             required
+            min="1"
+            max="65535"
             className="w-full bg-surface-container border border-neutral-800/50 rounded-lg px-3 py-2 text-sm font-mono text-on-surface focus:outline-none focus:border-primary/50"
           />
         </div>

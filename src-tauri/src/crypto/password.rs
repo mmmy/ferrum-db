@@ -5,10 +5,12 @@ use aes_gcm::{
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use keyring::Entry;
 use rand::RngCore;
+use std::sync::OnceLock;
 use thiserror::Error;
 
 const SERVICE_NAME: &str = "ferrumdb";
 const KEY_ACCOUNT: &str = "encryption_key";
+static ENCRYPTION_KEY: OnceLock<[u8; 32]> = OnceLock::new();
 
 #[derive(Error, Debug)]
 pub enum CryptoError {
@@ -31,6 +33,10 @@ fn generate_key() -> [u8; 32] {
 
 /// Get or create the encryption key from the system keyring
 pub fn get_or_create_key() -> Result<[u8; 32], CryptoError> {
+    if let Some(key) = ENCRYPTION_KEY.get() {
+        return Ok(*key);
+    }
+
     let entry = Entry::new(SERVICE_NAME, KEY_ACCOUNT)
         .map_err(|e| CryptoError::KeyringError(e.to_string()))?;
 
@@ -42,6 +48,7 @@ pub fn get_or_create_key() -> Result<[u8; 32], CryptoError> {
         if key_bytes.len() == 32 {
             let mut key = [0u8; 32];
             key.copy_from_slice(&key_bytes);
+            let _ = ENCRYPTION_KEY.set(key);
             return Ok(key);
         }
     }
@@ -53,6 +60,7 @@ pub fn get_or_create_key() -> Result<[u8; 32], CryptoError> {
     entry.set_password(&key_str)
         .map_err(|e| CryptoError::KeyringError(e.to_string()))?;
 
+    let _ = ENCRYPTION_KEY.set(key);
     Ok(key)
 }
 

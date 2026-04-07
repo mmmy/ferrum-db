@@ -26,11 +26,11 @@ export interface CreateConnectionInput {
 }
 
 export interface UpdateConnectionInput {
-  name?: string;
-  db_type?: 'mysql' | 'postgresql';
-  host?: string;
-  port?: number;
-  username?: string;
+  name: string;
+  db_type: 'mysql' | 'postgresql';
+  host: string;
+  port: number;
+  username: string;
   password?: string;
   database?: string;
   environment?: 'production' | 'staging' | 'development';
