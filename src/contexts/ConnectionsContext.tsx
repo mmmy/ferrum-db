@@ -6,7 +6,7 @@ import { invoke } from '@tauri-apps/api/core';
 interface ConnectionsState {
   connections: Connection[];
   isLoading: boolean;
-  error: string | null;
+  loadError: string | null;
 }
 
 // Actions
@@ -16,7 +16,7 @@ type ConnectionsAction =
   | { type: 'ADD_CONNECTION'; payload: Connection }
   | { type: 'UPDATE_CONNECTION'; payload: Connection }
   | { type: 'DELETE_CONNECTION'; payload: string }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'SET_LOAD_ERROR'; payload: string | null };
 
 // Reducer
 function connectionsReducer(state: ConnectionsState, action: ConnectionsAction): ConnectionsState {
@@ -24,13 +24,12 @@ function connectionsReducer(state: ConnectionsState, action: ConnectionsAction):
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_CONNECTIONS':
-      return { ...state, connections: action.payload, isLoading: false, error: null };
+      return { ...state, connections: action.payload, isLoading: false, loadError: null };
     case 'ADD_CONNECTION':
       return {
         ...state,
         connections: [...state.connections, action.payload],
-        isLoading: false,
-        error: null,
+        loadError: null,
       };
     case 'UPDATE_CONNECTION':
       return {
@@ -38,18 +37,16 @@ function connectionsReducer(state: ConnectionsState, action: ConnectionsAction):
         connections: state.connections.map((c) =>
           c.id === action.payload.id ? action.payload : c
         ),
-        isLoading: false,
-        error: null,
+        loadError: null,
       };
     case 'DELETE_CONNECTION':
       return {
         ...state,
         connections: state.connections.filter((c) => c.id !== action.payload),
-        isLoading: false,
-        error: null,
+        loadError: null,
       };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload, isLoading: false };
+    case 'SET_LOAD_ERROR':
+      return { ...state, loadError: action.payload, isLoading: false };
     default:
       return state;
   }
@@ -69,7 +66,7 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(connectionsReducer, {
     connections: [],
     isLoading: true,
-    error: null,
+    loadError: null,
   });
 
   const loadConnections = async () => {
@@ -78,24 +75,21 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
       const connections = await invoke<Connection[]>('list_connections');
       dispatch({ type: 'SET_CONNECTIONS', payload: connections });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: String(error) });
+      dispatch({ type: 'SET_LOAD_ERROR', payload: String(error) });
     }
   };
 
   const createConnection = async (input: CreateConnectionInput) => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
       const connection = await invoke<Connection>('create_connection', { data: input });
       dispatch({ type: 'ADD_CONNECTION', payload: connection });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: String(error) });
       throw error;
     }
   };
 
   const updateConnection = async (id: string, input: UpdateConnectionInput) => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
       const connection = await invoke<Connection | null>('update_connection', { id, data: input });
       if (connection) {
         dispatch({ type: 'UPDATE_CONNECTION', payload: connection });
@@ -104,18 +98,15 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
 
       throw new Error('Connection not found');
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: String(error) });
       throw error;
     }
   };
 
   const deleteConnection = async (id: string) => {
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
       await invoke('delete_connection', { id });
       dispatch({ type: 'DELETE_CONNECTION', payload: id });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: String(error) });
       throw error;
     }
   };

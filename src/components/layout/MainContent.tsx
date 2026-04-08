@@ -7,8 +7,10 @@ interface MainContentProps {
 
 export function MainContent({ children, className = '' }: MainContentProps) {
   return (
-    <main className={`flex-1 p-6 overflow-auto custom-scrollbar ${className}`}>
-      {children}
+    <main className={`custom-scrollbar flex-1 overflow-auto px-6 py-8 md:px-8 ${className}`}>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8">
+        {children}
+      </div>
     </main>
   );
 }

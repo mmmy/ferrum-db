@@ -1,34 +1,31 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { MainContent } from './MainContent';
 
 interface LayoutProps {
   children: ReactNode;
-  title?: string;
-  searchPlaceholder?: string;
-  onSearch?: (value: string) => void;
-  onAdd?: () => void;
+  headerTitle?: string;
+  headerSubtitle?: string;
+  headerActions?: ReactNode;
+  activeNavItem?: string;
 }
 
 export function Layout({
   children,
-  title = 'Connections',
-  searchPlaceholder,
-  onSearch,
-  onAdd,
+  headerTitle = 'Connections',
+  headerSubtitle = 'Local workspace shell',
+  headerActions,
+  activeNavItem = 'Connections',
 }: LayoutProps) {
-  const [activeNav, setActiveNav] = useState('Connections');
-
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar activeItem={activeNav} onNavigate={setActiveNav} />
+      <Sidebar activeItem={activeNavItem} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header
-          title={title}
-          searchPlaceholder={searchPlaceholder}
-          onSearch={onSearch}
-          onAdd={onAdd}
+          title={headerTitle}
+          subtitle={headerSubtitle}
+          actions={headerActions}
         />
         <MainContent>{children}</MainContent>
       </div>
