@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kinetic Console - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Space+Grotesk:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#5ca2ff",
+                    "secondary-fixed": "#fddc9a",
+                    "outline-variant": "#484848",
+                    "primary": "#79b0ff",
+                    "on-primary-fixed-variant": "#002c58",
+                    "background": "#0e0e0e",
+                    "tertiary-fixed-dim": "#ff7b74",
+                    "primary-fixed-dim": "#3794ff",
+                    "on-secondary": "#634d19",
+                    "on-error": "#490006",
+                    "on-surface-variant": "#adabaa",
+                    "tertiary-dim": "#ff716b",
+                    "secondary-fixed-dim": "#eece8d",
+                    "surface-dim": "#0e0e0e",
+                    "on-tertiary": "#490005",
+                    "surface-container-low": "#131313",
+                    "surface-container": "#191a1a",
+                    "on-error-container": "#ffa8a3",
+                    "surface": "#0e0e0e",
+                    "primary-dim": "#569fff",
+                    "surface-container-high": "#1f2020",
+                    "secondary-container": "#594410",
+                    "secondary": "#fddc9a",
+                    "secondary-dim": "#eece8d",
+                    "on-secondary-fixed-variant": "#6e5622",
+                    "inverse-on-surface": "#565555",
+                    "error-dim": "#d7383b",
+                    "tertiary-fixed": "#ff928b",
+                    "outline": "#767575",
+                    "on-primary-fixed": "#000000",
+                    "surface-container-lowest": "#000000",
+                    "error": "#ff716c",
+                    "primary-container": "#5ca2ff",
+                    "on-tertiary-fixed-variant": "#79000e",
+                    "on-background": "#ffffff",
+                    "tertiary-container": "#fe4e4d",
+                    "inverse-surface": "#fcf9f8",
+                    "inverse-primary": "#005fb2",
+                    "on-tertiary-container": "#1f0001",
+                    "tertiary": "#ff716b",
+                    "on-primary-container": "#002348",
+                    "error-container": "#9f0519",
+                    "surface-bright": "#2c2c2c",
+                    "on-primary": "#002e5c",
+                    "on-secondary-container": "#eccc8c",
+                    "surface-variant": "#262626",
+                    "on-tertiary-fixed": "#3a0003",
+                    "surface-tint": "#79b0ff",
+                    "surface-container-highest": "#262626",
+                    "on-surface": "#ffffff",
+                    "on-secondary-fixed": "#4f3a07"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e0e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3794FF;
+            box-shadow: 0 0 0 1px #3794FF;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container h-screen flex flex-col overflow-hidden">
+<!-- TopAppBar from JSON -->
+<header class="flex justify-between items-center px-4 w-full sticky top-0 z-40 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800/50 shadow-2xl shadow-black/50 h-12 font-['Inter'] font-medium text-sm">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 bg-primary-fixed-dim rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-fixed text-xs" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<span class="font-['Space_Grotesk'] font-bold text-white tracking-tight">Kinetic Console</span>
+</div>
+<nav class="hidden md:flex gap-6">
+<a class="text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-150 px-2 py-1" href="#">Query</a>
+<a class="text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-150 px-2 py-1" href="#">Export</a>
+<a class="text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-150 px-2 py-1" href="#">Schema</a>
+<a class="text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-150 px-2 py-1" href="#">Logs</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-neutral-800 text-on-surface hover:bg-neutral-700 px-3 py-1 rounded text-xs font-bold transition-all duration-150">Execute</button>
+<button class="bg-primary text-on-primary hover:bg-primary-dim px-3 py-1 rounded text-xs font-bold transition-all duration-150">Connect</button>
+<div class="flex items-center gap-2 border-l border-neutral-800 ml-2 pl-4">
+<span class="material-symbols-outlined text-neutral-400 cursor-pointer hover:text-white" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-blue-400 cursor-pointer" data-icon="settings_suggest">settings_suggest</span>
+<img alt="Admin Avatar" class="w-7 h-7 rounded bg-neutral-800 ml-2" data-alt="close-up portrait of a tech professional in a high-tech studio environment with soft blue ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMMLz8VR9Cw4JDm9ABbOBHtQSdTO_cQaMnQJMOP7dR8iU0TOXIRCD2wfhTtbB6qTmFuCU9yR_XvRZxevXxPCp-dEMYWG9Ha8M8RGtdAPJsqZiOc1fXid5Ef3FwixgOB6oLC84E_TO649X5e-FzWV4XcZNrKOh5jYjV-f5ERLNOSHaC3ivHGRGXc4e0zK0OBV8kIDJGL3x4gNz1DW6vDpkYkc3OdG2x64O2M37M1jGLxI5_18IWZ2KHO74tXMoXcIm5Z3e0w4qE8VJN"/>
+</div>
+</div>
+</header>
+<div class="flex-1 flex overflow-hidden">
+<!-- SideNavBar from JSON -->
+<aside class="flex flex-col h-screen sticky top-0 bg-neutral-900 gap-1 bg-neutral-950 h-full w-64 left-0 font-['Inter'] tracking-tight border-r border-neutral-800">
+<div class="p-6 flex flex-col gap-1 border-b border-neutral-800/50">
+<div class="text-lg font-black text-white tracking-tighter">The Kinetic Console</div>
+<div class="text-[10px] text-neutral-500 font-label uppercase tracking-widest">Precision Engine v1.0</div>
+</div>
+<nav class="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150 scale-95 active:bg-neutral-700" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+<span class="text-sm font-medium">Connections</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150 scale-95 active:bg-neutral-700" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="text-sm font-medium">SQL Editor</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150 scale-95 active:bg-neutral-700" href="#">
+<span class="material-symbols-outlined" data-icon="table_rows">table_rows</span>
+<span class="text-sm font-medium">Data Browser</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150 scale-95 active:bg-neutral-700" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+<span class="text-sm font-medium">ER Diagram</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150 scale-95 active:bg-neutral-700" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded text-blue-400 bg-neutral-800 border-r-2 border-blue-500 scale-95 active:bg-neutral-700" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-3 border-t border-neutral-800 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="menu_book">menu_book</span>
+<span class="text-xs">Docs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help_outline">help_outline</span>
+<span class="text-xs">Help</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-hidden bg-background p-8 flex flex-col gap-8 max-w-6xl mx-auto w-full">
+<header class="flex flex-col gap-2">
+<h1 class="text-4xl font-black tracking-tighter text-white">Console System Preferences</h1>
+<p class="text-on-surface-variant max-w-2xl">Configure your high-performance environment, editor optimizations, and security protocols for the Kinetic Engine.</p>
+</header>
+<div class="flex-1 flex gap-8 overflow-hidden">
+<!-- Inner Sub-Navigation -->
+<nav class="w-56 shrink-0 flex flex-col gap-1">
+<button class="flex items-center gap-3 px-4 py-3 rounded bg-surface-container-high text-primary font-bold text-left border-l-2 border-primary">
+<span class="material-symbols-outlined text-xl" data-icon="tune">tune</span>
+<span class="font-label text-sm uppercase tracking-wider">General</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant text-left transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="code">code</span>
+<span class="font-label text-sm uppercase tracking-wider">Editor</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant text-left transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="security">security</span>
+<span class="font-label text-sm uppercase tracking-wider">Security</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant text-left transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="rocket">rocket</span>
+<span class="font-label text-sm uppercase tracking-wider">Advanced</span>
+</button>
+<button class="flex items-center gap-3 px-4 py-3 rounded text-on-surface-variant hover:bg-surface-variant text-left transition-colors mt-auto">
+<span class="material-symbols-outlined text-xl" data-icon="info">info</span>
+<span class="font-label text-sm uppercase tracking-wider">About</span>
+</button>
+</nav>
+<!-- Scrollable Settings Panel -->
+<div class="flex-1 overflow-y-auto pr-4 pb-20 space-y-12">
+<!-- Section: General Settings -->
+<section class="space-y-6">
+<div class="flex items-center gap-4 pb-2 border-b border-neutral-800">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="palette">palette</span>
+<h2 class="text-xl font-bold text-white tracking-tight">General Settings</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-label uppercase text-on-surface-variant tracking-widest">Interface Theme</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="flex flex-col items-center gap-2 p-3 bg-surface-container border border-primary rounded hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="dark_mode" data-weight="fill">dark_mode</span>
+<span class="text-[10px] font-bold">DARK</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-3 bg-neutral-900 border border-neutral-800 rounded hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-neutral-500" data-icon="light_mode">light_mode</span>
+<span class="text-[10px] font-bold">LIGHT</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-3 bg-neutral-900 border border-neutral-800 rounded hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-neutral-500" data-icon="desktop_windows">desktop_windows</span>
+<span class="text-[10px] font-bold">SYSTEM</span>
+</button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-label uppercase text-on-surface-variant tracking-widest">Global Zoom Level</label>
+<select class="w-full bg-surface-container border border-neutral-800 rounded-lg px-4 py-2.5 text-sm">
+<option>90% (Compact)</option>
+<option selected="">100% (Default)</option>
+<option>110%</option>
+<option>125% (Comfort)</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-label uppercase text-on-surface-variant tracking-widest">Language</label>
+<select class="w-full bg-surface-container border border-neutral-800 rounded-lg px-4 py-2.5 text-sm">
+<option selected="">English (US)</option>
+<option>German (Deutsch)</option>
+<option>Japanese (日本語)</option>
+<option>French (Français)</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Section: Editor Preferences -->
+<section class="space-y-6">
+<div class="flex items-center gap-4 pb-2 border-b border-neutral-800">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="terminal">terminal</span>
+<h2 class="text-xl font-bold text-white tracking-tight">Editor Preferences</h2>
+</div>
+<div class="space-y-6">
+<div class="bg-surface-container border border-neutral-800 rounded-lg p-6">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h3 class="font-bold text-white">AI SQL Assistant</h3>
+<p class="text-xs text-on-surface-variant">Intelligent autocomplete and query generation</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-4">
+<button class="bg-background border border-primary/40 rounded p-3 text-left">
+<div class="text-[10px] font-label text-primary font-bold">MODEL SOURCE</div>
+<div class="text-sm font-bold">GPT-4 Turbo (Cloud)</div>
+</button>
+<button class="bg-neutral-900 border border-neutral-800 rounded p-3 text-left hover:border-neutral-600 transition-colors">
+<div class="text-[10px] font-label text-neutral-500 font-bold">LOCAL LLM</div>
+<div class="text-sm font-bold text-neutral-400">Llama 3 8B (vLLM)</div>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-label uppercase text-on-surface-variant tracking-widest">Code Font Family</label>
+<div class="bg-surface-container border border-neutral-800 rounded px-4 py-2 font-mono text-xs text-on-surface">JetBrains Mono, Menlo, monospace</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-label uppercase text-on-surface-variant tracking-widest">Tab Size</label>
+<input class="w-full bg-surface-container border border-neutral-800 rounded px-4 py-2 text-sm text-on-surface" type="number" value="2"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Connections & Security -->
+<section class="space-y-6">
+<div class="flex items-center gap-4 pb-2 border-b border-neutral-800">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="shield">shield</span>
+<h2 class="text-xl font-bold text-white tracking-tight">Connections &amp; Security</h2>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex items-center justify-between p-4 bg-tertiary-container/10 border border-tertiary/20 rounded-lg">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="warning">warning</span>
+<div>
+<h3 class="font-bold text-white text-sm">Read-only Production Mode</h3>
+<p class="text-xs text-on-surface-variant">Force read-only queries on production environment instances</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-tertiary"></div>
+</label>
+</div>
+<div class="p-4 bg-surface-container border border-neutral-800 rounded-lg space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="font-bold text-white text-sm">Default SSH Key</h3>
+<button class="text-xs text-primary font-bold hover:underline">REPLACE KEY</button>
+</div>
+<div class="font-mono text-[11px] text-neutral-500 bg-black/50 p-3 rounded break-all">
+                                    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIInp3XvN/8v9L+NlXmD3X8B6W/J/0LwN1w...
+                                </div>
+</div>
+</div>
+</section>
+<!-- Section: Advanced -->
+<section class="space-y-6">
+<div class="flex items-center gap-4 pb-2 border-b border-neutral-800">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="settings_input_component">settings_input_component</span>
+<h2 class="text-xl font-bold text-white tracking-tight">Advanced Engine</h2>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-surface-container border border-neutral-800 rounded-lg p-4 space-y-2">
+<div class="text-[10px] font-label text-neutral-500 font-bold uppercase tracking-tighter">Memory Limit</div>
+<div class="text-2xl font-black text-white">4.0 <span class="text-xs font-normal text-neutral-500">GB</span></div>
+<div class="w-full bg-neutral-800 h-1 rounded-full overflow-hidden">
+<div class="bg-primary w-2/3 h-full"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-neutral-800 rounded-lg p-4 space-y-2">
+<div class="text-[10px] font-label text-neutral-500 font-bold uppercase tracking-tighter">Plugin Runtime</div>
+<div class="text-2xl font-black text-white">RUST <span class="text-xs font-normal text-neutral-500">v1.78</span></div>
+<div class="flex gap-1">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<div class="text-[10px] text-green-500">OPTIMIZED</div>
+</div>
+</div>
+<div class="bg-surface-container border border-neutral-800 rounded-lg p-4 space-y-2">
+<div class="text-[10px] font-label text-neutral-500 font-bold uppercase tracking-tighter">Cold Start</div>
+<div class="text-2xl font-black text-white">ON</div>
+<div class="text-[10px] text-primary">INSTANT LOAD ENABLED</div>
+</div>
+</div>
+</section>
+<!-- Section: About -->
+<section class="pt-8 space-y-4">
+<div class="p-8 bg-gradient-to-br from-neutral-900 to-black rounded-2xl border border-neutral-800 flex items-center justify-between overflow-hidden relative group">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-primary/10 transition-colors"></div>
+<div class="space-y-4 relative z-10">
+<div>
+<h3 class="text-2xl font-black text-white">Kinetic Console</h3>
+<p class="text-neutral-500 font-mono text-sm">v1.0.0-stable.build_482</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-white text-black text-xs font-bold px-6 py-2 rounded-full hover:bg-neutral-200 transition-colors">CHECK FOR UPDATES</button>
+<button class="bg-neutral-800 text-white text-xs font-bold px-6 py-2 rounded-full border border-neutral-700 hover:bg-neutral-700 transition-colors">RELEASE NOTES</button>
+</div>
+</div>
+<div class="text-right space-y-1 opacity-40 hover:opacity-100 transition-opacity">
+<p class="text-[10px] font-label text-neutral-500 uppercase tracking-widest">Built for performance</p>
+<p class="text-[10px] font-label text-neutral-500 uppercase tracking-widest">© 2024 Kinetic Engineering Systems</p>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer from JSON -->
+<footer class="fixed bottom-0 left-0 w-full flex items-center justify-between px-6 z-50 bg-black border-t border-red-900/30 h-8 font-['JetBrains_Mono'] text-[11px] uppercase tracking-widest">
+<div class="flex items-center gap-6">
+<span class="text-red-400">Environment: Production</span>
+<div class="flex gap-4 text-neutral-600">
+<span class="hover:text-red-300 transition-colors cursor-default">Lat: 12ms</span>
+<span class="hover:text-red-300 transition-colors cursor-default">Uptime: 99.9%</span>
+<span class="text-red-400">AI: Ready</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-neutral-600">System Core Temp: 42°C</span>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+<span class="text-red-400">LIVE SYNC</span>
+</div>
+</div>
+</footer>
+</body></html>

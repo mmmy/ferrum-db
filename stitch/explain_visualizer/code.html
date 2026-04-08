@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kinetic Console - Explain Visualizer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#000000",
+                    "inverse-surface": "#fcf9f8",
+                    "inverse-on-surface": "#565555",
+                    "surface-container-low": "#131313",
+                    "on-primary-fixed-variant": "#002c58",
+                    "outline": "#767575",
+                    "on-tertiary": "#490005",
+                    "tertiary-fixed-dim": "#ff7b74",
+                    "secondary": "#fddc9a",
+                    "on-secondary": "#634d19",
+                    "primary": "#3794ff",
+                    "surface-variant": "#262626",
+                    "surface-container": "#191a1a",
+                    "tertiary-fixed": "#ff928b",
+                    "on-primary": "#002e5c",
+                    "on-secondary-fixed-variant": "#6e5622",
+                    "primary-fixed-dim": "#3794ff",
+                    "secondary-fixed": "#fddc9a",
+                    "tertiary-dim": "#ff716b",
+                    "on-primary-container": "#002348",
+                    "surface-container-high": "#1f2020",
+                    "on-surface-variant": "#adabaa",
+                    "tertiary-container": "#fe4e4d",
+                    "surface-dim": "#0e0e0e",
+                    "secondary-dim": "#eece8d",
+                    "error": "#ff716c",
+                    "surface-tint": "#79b0ff",
+                    "error-dim": "#d7383b",
+                    "background": "#0e0e0e",
+                    "primary-fixed": "#5ca2ff",
+                    "on-tertiary-fixed": "#3a0003",
+                    "on-secondary-fixed": "#4f3a07",
+                    "surface-container-highest": "#262626",
+                    "tertiary": "#ff716b",
+                    "surface": "#0e0e0e",
+                    "on-tertiary-container": "#1f0001",
+                    "on-background": "#ffffff",
+                    "on-secondary-container": "#eccc8c",
+                    "on-surface": "#ffffff",
+                    "on-error-container": "#ffa8a3",
+                    "error-container": "#9f0519",
+                    "secondary-container": "#594410",
+                    "on-primary-fixed": "#000000",
+                    "on-tertiary-fixed-variant": "#79000e",
+                    "surface-bright": "#2c2c2c",
+                    "outline-variant": "#484848",
+                    "primary-container": "#5ca2ff",
+                    "inverse-primary": "#005fb2",
+                    "secondary-fixed-dim": "#eece8d",
+                    "primary-dim": "#569fff",
+                    "on-error": "#490006"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"],
+                    "mono": ["JetBrains Mono", "monospace"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .tree-connector {
+            position: absolute;
+            border-left: 2px solid #262626;
+            border-bottom: 2px solid #262626;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar -->
+<header class="bg-zinc-950 text-blue-500 font-['Inter'] antialiased docked full-width top-0 border-b border-zinc-800 flex justify-between items-center px-6 h-14 w-full fixed z-50">
+<div class="flex items-center gap-8">
+<div class="text-lg font-bold tracking-tighter text-blue-500">Kinetic Console</div>
+<nav class="hidden md:flex gap-6">
+<a class="text-zinc-400 font-medium hover:text-zinc-100 transition-colors" href="#">Cluster</a>
+<a class="text-zinc-400 font-medium hover:text-zinc-100 transition-colors" href="#">Schema</a>
+<a class="text-blue-500 border-b-2 border-blue-500 pb-1 transition-colors" href="#">Queries</a>
+<a class="text-zinc-400 font-medium hover:text-zinc-100 transition-colors" href="#">Logs</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-400 cursor-pointer hover:text-zinc-100">settings</span>
+<span class="material-symbols-outlined text-zinc-400 cursor-pointer hover:text-zinc-100">help</span>
+<div class="w-8 h-8 rounded bg-zinc-800 border border-zinc-700 overflow-hidden">
+<img alt="User profile" data-alt="minimalist avatar of a software engineer with glasses and dark clothing on a neutral gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrm96MXsuYGf8w7TnKkidSZjLLVDQdrWNe8lqZZjyvjrqSvbXZSCCdNTvmAvidvdKPp8jYdOz8mz8EmBy6u8Js7SlI8yQD7NglBL2c0lT1tPMhXvkvw6sBqOHlZhuz52LpDO3xgiQmObQy15gabmMMoj0g07m4upt_53IaelpLNuuuFL0QnxdIDXVe87wF3y51bypQzUMMT8bsSzofQFNcV5kN-JC_SQ8O-Rr4gtIUTri8YuIs-yNnhw3jOMkf019kp8EKAYFi74St"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="bg-zinc-950 text-zinc-500 font-['Inter'] text-sm h-screen w-64 border-r border-zinc-800 flex flex-col fixed left-0 top-0 h-full z-40 pt-14 duration-150 ease-in-out">
+<div class="p-6 border-b border-zinc-800">
+<div class="text-blue-500 font-black tracking-tight">Project Alpha</div>
+<div class="text-[10px] text-zinc-600 uppercase tracking-widest font-bold">Production-v2</div>
+</div>
+<div class="flex-1 py-4">
+<nav class="flex flex-col gap-1 px-2">
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-200 transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 bg-zinc-900 text-blue-400 border-r-2 border-blue-500 transition-all rounded-l" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span>Explain</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-200 transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="compare_arrows">compare_arrows</span>
+<span>Migrations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-200 transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span>History</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-zinc-500 hover:bg-zinc-900/50 hover:text-zinc-200 transition-all rounded" href="#">
+<span class="material-symbols-outlined" data-icon="backup">backup</span>
+<span>Backups</span>
+</a>
+</nav>
+</div>
+<div class="p-4 border-t border-zinc-800">
+<button class="w-full bg-blue-500 text-on-primary-fixed font-bold py-2 rounded flex items-center justify-center gap-2 active:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Query
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-14 p-0 flex h-[calc(100vh-3.5rem)] overflow-hidden bg-surface">
+<!-- Interactive Visualizer Area -->
+<div class="flex-1 relative overflow-hidden bg-[#0a0a0a] flex flex-col">
+<!-- Toolbar -->
+<div class="h-16 border-b border-outline-variant px-6 flex items-center justify-between bg-surface-container-low/50 backdrop-blur-md z-30">
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-surface-container-highest rounded-lg p-1">
+<button class="p-1.5 hover:bg-surface-variant rounded text-on-surface-variant"><span class="material-symbols-outlined">zoom_in</span></button>
+<button class="p-1.5 hover:bg-surface-variant rounded text-on-surface-variant"><span class="material-symbols-outlined">zoom_out</span></button>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<button class="flex items-center gap-2 px-3 py-1 hover:bg-surface-variant rounded text-xs font-label uppercase tracking-wider text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">restart_alt</span> Reset View
+                        </button>
+</div>
+<button class="px-4 py-1.5 bg-surface-container-high hover:bg-surface-variant border border-outline-variant rounded-lg text-xs font-label uppercase tracking-wider transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">code</span> Toggle Raw SQL
+                    </button>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-end">
+<span class="text-[10px] text-zinc-500 font-label uppercase">Total Runtime</span>
+<span class="font-mono text-primary font-bold">142.34 ms</span>
+</div>
+<div class="w-px h-8 bg-outline-variant"></div>
+<div class="flex flex-col items-end">
+<span class="text-[10px] text-zinc-500 font-label uppercase">Planning Time</span>
+<span class="font-mono text-secondary-dim font-bold">0.82 ms</span>
+</div>
+</div>
+</div>
+<!-- The Visualizer Canvas -->
+<div class="flex-1 relative overflow-auto p-12 bg-[radial-gradient(#1e1e1e_1px,transparent_1px)] [background-size:32px_32px]">
+<!-- SVG Connections Placeholder (Visual representation) -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+<path d="M500 100 L500 180 M500 180 L300 240 M500 180 L700 240 M300 340 L300 400" fill="none" stroke="#3794ff" stroke-width="2"></path>
+</svg>
+<div class="max-w-5xl mx-auto flex flex-col items-center space-y-24">
+<!-- Root Node: Nested Loop -->
+<div class="relative group">
+<div class="w-64 bg-surface-container-highest border-2 border-primary rounded-xl p-4 shadow-2xl transition-all cursor-pointer ring-offset-4 ring-offset-background group-hover:ring-2 ring-primary/50">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Nested Loop</span>
+<span class="bg-tertiary-container/30 text-tertiary px-2 py-0.5 rounded text-[10px] font-bold">84% Cost</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Actual Time</span>
+<span class="font-mono text-sm">118.2ms</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Rows</span>
+<span class="font-mono text-sm">12,402</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Children row -->
+<div class="flex gap-32">
+<!-- Left Child: Index Scan -->
+<div class="relative">
+<div class="w-64 bg-surface-container border border-outline-variant rounded-xl p-4 shadow-xl transition-all hover:border-primary/50 cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-secondary-container/50 text-secondary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Index Scan</span>
+<span class="bg-surface-variant text-zinc-400 px-2 py-0.5 rounded text-[10px] font-bold">12% Cost</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Actual Time</span>
+<span class="font-mono text-sm">14.1ms</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Rows</span>
+<span class="font-mono text-sm">1</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Child: Hash Join -->
+<div class="relative flex flex-col items-center">
+<div class="w-64 bg-surface-container-high border border-primary/40 rounded-xl p-4 shadow-xl transition-all hover:scale-[1.02] cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-primary/10 text-primary-dim text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Hash Join</span>
+<span class="bg-tertiary-container/20 text-tertiary-dim px-2 py-0.5 rounded text-[10px] font-bold">72% Cost</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Actual Time</span>
+<span class="font-mono text-sm">102.4ms</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Rows</span>
+<span class="font-mono text-sm">84,100</span>
+</div>
+</div>
+</div>
+<!-- Grandchild of Hash Join -->
+<div class="mt-24">
+<div class="w-64 bg-surface-container border border-outline-variant rounded-xl p-4 shadow-xl opacity-80 hover:opacity-100 transition-all cursor-pointer">
+<div class="flex justify-between items-start mb-3">
+<span class="bg-surface-variant text-zinc-400 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Sequential Scan</span>
+<span class="bg-surface-variant text-zinc-500 px-2 py-0.5 rounded text-[10px] font-bold">4% Cost</span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Actual Time</span>
+<span class="font-mono text-sm">2.8ms</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-zinc-500 text-xs">Rows</span>
+<span class="font-mono text-sm">1,200</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side Panel: Node Details -->
+<aside class="w-80 bg-surface-container border-l border-outline-variant flex flex-col z-40 overflow-y-auto">
+<div class="p-6 border-b border-outline-variant">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<h2 class="font-headline font-bold text-sm tracking-wide">Node Statistics</h2>
+</div>
+<div class="text-xs text-zinc-500">Analysis for selected <span class="text-on-surface font-semibold">Nested Loop</span></div>
+</div>
+<div class="p-6 space-y-8">
+<!-- Data Cluster 1 -->
+<div>
+<h3 class="text-[10px] font-label uppercase tracking-widest text-zinc-500 mb-4">Core Performance</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-xs text-zinc-400">Actual Time</span>
+<span class="font-mono text-xs text-on-surface">118.234 ms</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-zinc-400">Actual Rows</span>
+<span class="font-mono text-xs text-on-surface">12,402</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-zinc-400">Actual Loops</span>
+<span class="font-mono text-xs text-on-surface">1</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full mt-2 overflow-hidden">
+<div class="bg-tertiary-container h-full w-[84%]"></div>
+</div>
+</div>
+</div>
+<!-- Data Cluster 2 -->
+<div>
+<h3 class="text-[10px] font-label uppercase tracking-widest text-zinc-500 mb-4">Storage Metrics</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-xs text-zinc-400">Shared Hit</span>
+<span class="font-mono text-xs text-secondary">4,028</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-zinc-400">Shared Read</span>
+<span class="font-mono text-xs text-on-surface">12</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-xs text-zinc-400">Temp Read</span>
+<span class="font-mono text-xs text-on-surface">0</span>
+</div>
+</div>
+</div>
+<!-- Conditions -->
+<div>
+<h3 class="text-[10px] font-label uppercase tracking-widest text-zinc-500 mb-4">Filter Conditions</h3>
+<div class="bg-surface-container-lowest p-3 rounded-lg border border-outline-variant font-mono text-[11px] leading-relaxed text-blue-300">
+                        (users.id = orders.user_id) AND (orders.status = 'completed')
+                    </div>
+</div>
+<!-- Optimization Suggestion -->
+<div class="bg-primary-container/10 border border-primary/20 p-4 rounded-xl">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+<div>
+<div class="text-xs font-bold text-primary mb-1">Optimizer Hint</div>
+<p class="text-[11px] text-zinc-400 leading-normal">High cost loop detected. Consider adding a composite index on <span class="text-on-surface italic">orders(user_id, status)</span> to convert this to an Index Join.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-6 border-t border-outline-variant">
+<button class="w-full bg-surface-variant hover:bg-outline-variant text-on-surface font-label text-xs uppercase tracking-widest py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                    Export JSON
+                </button>
+</div>
+</aside>
+</main>
+<!-- FAB Suppression: On Details/Technical screens, we suppress the primary floating action button for focus -->
+</body></html>
