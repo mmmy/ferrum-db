@@ -1,62 +1,31 @@
+import { ReactNode } from 'react';
+
 interface HeaderProps {
   title?: string;
-  searchPlaceholder?: string;
-  onSearch?: (value: string) => void;
-  onAdd?: () => void;
+  subtitle?: string;
+  actions?: ReactNode;
 }
 
 export function Header({
   title = 'Connections',
-  searchPlaceholder = 'Search connections...',
-  onSearch,
-  onAdd,
+  subtitle = 'Local workspace shell',
+  actions,
 }: HeaderProps) {
   return (
-    <header className="h-12 bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800/50 flex items-center justify-between px-4">
-      {/* Left: Title */}
-      <div className="flex items-center gap-4">
-        <h2 className="text-lg font-headline font-semibold text-on-surface">{title}</h2>
-        <div className="flex gap-1">
-          <button className="px-3 py-1 text-xs font-label text-primary border-b-2 border-primary">
-            All
-          </button>
-          <button className="px-3 py-1 text-xs font-label text-on-surface-variant hover:text-on-surface transition-colors">
-            Production
-          </button>
-          <button className="px-3 py-1 text-xs font-label text-on-surface-variant hover:text-on-surface transition-colors">
-            Staging
-          </button>
+    <header className="border-b border-neutral-800/50 bg-neutral-950/85 px-6 py-4 backdrop-blur-md">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary/80">
+            Workspace Shell
+          </p>
+          <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <h2 className="text-base font-headline font-semibold text-on-surface">{title}</h2>
+            <p className="text-sm text-on-surface-variant">{subtitle}</p>
+          </div>
         </div>
-      </div>
-
-      {/* Right: Search + Actions */}
-      <div className="flex items-center gap-3">
-        {/* Search Input */}
-        <div className="relative">
-          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">
-            search
-          </span>
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            onChange={(e) => onSearch?.(e.target.value)}
-            className="w-64 bg-surface-container border border-neutral-800/50 rounded-lg pl-9 pr-3 py-1.5 text-sm font-body text-on-surface placeholder-on-surface-variant focus:outline-none focus:border-primary/50 transition-colors"
-          />
-        </div>
-
-        {/* Add Button */}
-        <button
-          onClick={onAdd}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-neutral-950 rounded-lg text-sm font-label font-medium hover:bg-primary-dim transition-colors"
-        >
-          <span className="material-symbols-outlined text-lg">add_circle</span>
-          Connect
-        </button>
-
-        {/* User Actions */}
-        <button className="p-1.5 rounded-lg hover:bg-surface-container transition-colors">
-          <span className="material-symbols-outlined text-on-surface-variant">more_vert</span>
-        </button>
+        {actions ? (
+          <div className="flex items-center gap-3">{actions}</div>
+        ) : null}
       </div>
     </header>
   );
