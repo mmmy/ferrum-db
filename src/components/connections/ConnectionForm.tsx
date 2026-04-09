@@ -8,8 +8,20 @@ interface ConnectionFormProps {
   isLoading?: boolean;
 }
 
+type ConnectionFormState = {
+  name: string;
+  db_type: CreateConnectionInput['db_type'];
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  environment: NonNullable<CreateConnectionInput['environment']> | '';
+  tags: string[];
+};
+
 export function ConnectionForm({ connection, onSubmit, onCancel, isLoading }: ConnectionFormProps) {
-  const [formData, setFormData] = useState<CreateConnectionInput>({
+  const [formData, setFormData] = useState<ConnectionFormState>({
     name: '',
     db_type: 'mysql',
     host: 'localhost',
@@ -31,7 +43,7 @@ export function ConnectionForm({ connection, onSubmit, onCancel, isLoading }: Co
         username: connection.username,
         password: '', // Don't populate password for security
         database: connection.database || '',
-        environment: connection.environment || 'development',
+        environment: connection.environment || '',
         tags: connection.tags,
       });
     }
@@ -39,10 +51,16 @@ export function ConnectionForm({ connection, onSubmit, onCancel, isLoading }: Co
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const database = formData.database.trim();
+
+    onSubmit({
+      ...formData,
+      database: database || undefined,
+      environment: formData.environment || undefined,
+    });
   };
 
-  const handleChange = (field: keyof CreateConnectionInput, value: string | number) => {
+  const handleChange = (field: keyof ConnectionFormState, value: string | number | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -185,6 +203,7 @@ export function ConnectionForm({ connection, onSubmit, onCancel, isLoading }: Co
             onChange={(e) => handleChange('environment', e.target.value)}
             className="w-full bg-surface-container border border-neutral-800/50 rounded-lg px-3 py-2 text-sm font-body text-on-surface focus:outline-none focus:border-primary/50"
           >
+            <option value="">Unspecified</option>
             <option value="development">Development</option>
             <option value="staging">Staging</option>
             <option value="production">Production</option>
