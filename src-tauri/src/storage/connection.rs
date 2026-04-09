@@ -1,8 +1,9 @@
-use rusqlite::{Connection, params};
+use chrono::Utc;
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use thiserror::Error;
 use uuid::Uuid;
-use chrono::Utc;
 
 use crate::crypto;
 
@@ -81,6 +82,14 @@ pub struct UpdateConnectionInput {
     pub tags: Option<Vec<String>>,
 }
 
+#[derive(Debug, Error)]
+pub enum ConnectionSecretError {
+    #[error(transparent)]
+    Storage(#[from] rusqlite::Error),
+    #[error(transparent)]
+    Credential(#[from] crypto::CryptoError),
+}
+
 pub struct Storage {
     conn: Connection,
 }
@@ -114,7 +123,10 @@ impl Storage {
         Ok(())
     }
 
-    fn get_stored_connection(&self, id: &str) -> Result<Option<StoredConnectionRecord>, rusqlite::Error> {
+    fn get_stored_connection(
+        &self,
+        id: &str,
+    ) -> Result<Option<StoredConnectionRecord>, rusqlite::Error> {
         let mut stmt = self.conn.prepare(
             "SELECT id, name, db_type, host, port, username, password, database, environment, tags, created_at, updated_at FROM connections WHERE id = ?"
         )?;
@@ -155,49 +167,56 @@ impl Storage {
             "SELECT id, name, db_type, host, port, username, password, database, environment, tags, created_at, updated_at FROM connections ORDER BY name"
         )?;
 
-        let connections = stmt.query_map([], |row| {
-            let tags_str: Option<String> = row.get(9)?;
-            let tags: Vec<String> = tags_str
-                .map(|s| serde_json::from_str(&s).unwrap_or_default())
-                .unwrap_or_default();
+        let connections = stmt
+            .query_map([], |row| {
+                let tags_str: Option<String> = row.get(9)?;
+                let tags: Vec<String> = tags_str
+                    .map(|s| serde_json::from_str(&s).unwrap_or_default())
+                    .unwrap_or_default();
 
-            Ok(ConnectionConfig {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                db_type: row.get(2)?,
-                host: row.get(3)?,
-                port: row.get(4)?,
-                username: row.get(5)?,
-                password: "***".to_string(),
-                database: row.get(7)?,
-                environment: row.get(8)?,
-                tags,
-                created_at: row.get(10)?,
-                updated_at: row.get(11)?,
-            })
-        })?.collect::<Result<Vec<_>, _>>()?;
+                Ok(ConnectionConfig {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    db_type: row.get(2)?,
+                    host: row.get(3)?,
+                    port: row.get(4)?,
+                    username: row.get(5)?,
+                    password: "***".to_string(),
+                    database: row.get(7)?,
+                    environment: row.get(8)?,
+                    tags,
+                    created_at: row.get(10)?,
+                    updated_at: row.get(11)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
 
         Ok(connections)
     }
 
     pub fn get_connection(&self, id: &str) -> Result<Option<ConnectionConfig>, rusqlite::Error> {
-        Ok(self.get_stored_connection(id)?.map(|record| ConnectionConfig {
-            id: record.id,
-            name: record.name,
-            db_type: record.db_type,
-            host: record.host,
-            port: record.port,
-            username: record.username,
-            password: "***".to_string(),
-            database: record.database,
-            environment: record.environment,
-            tags: record.tags,
-            created_at: record.created_at,
-            updated_at: record.updated_at,
-        }))
+        Ok(self
+            .get_stored_connection(id)?
+            .map(|record| ConnectionConfig {
+                id: record.id,
+                name: record.name,
+                db_type: record.db_type,
+                host: record.host,
+                port: record.port,
+                username: record.username,
+                password: "***".to_string(),
+                database: record.database,
+                environment: record.environment,
+                tags: record.tags,
+                created_at: record.created_at,
+                updated_at: record.updated_at,
+            }))
     }
 
-    pub fn create_connection(&self, input: CreateConnectionInput) -> Result<ConnectionConfig, rusqlite::Error> {
+    pub fn create_connection(
+        &self,
+        input: CreateConnectionInput,
+    ) -> Result<ConnectionConfig, rusqlite::Error> {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
         let tags = input.tags.unwrap_or_default();
@@ -239,7 +258,11 @@ impl Storage {
         })
     }
 
-    pub fn update_connection(&self, id: &str, input: UpdateConnectionInput) -> Result<Option<ConnectionConfig>, rusqlite::Error> {
+    pub fn update_connection(
+        &self,
+        id: &str,
+        input: UpdateConnectionInput,
+    ) -> Result<Option<ConnectionConfig>, rusqlite::Error> {
         let existing = self.get_stored_connection(id)?;
         if let Some(existing) = existing {
             let now = Utc::now().to_rfc3339();
@@ -283,19 +306,13 @@ impl Storage {
         }
     }
 
-    /// Get connection with decrypted password (for testing connection)
-    pub fn get_connection_with_password(&self, id: &str) -> Result<Option<ConnectionWithPassword>, rusqlite::Error> {
+    /// Get connection with decrypted password for runtime operations.
+    pub fn get_connection_with_password(
+        &self,
+        id: &str,
+    ) -> Result<Option<ConnectionWithPassword>, ConnectionSecretError> {
         if let Some(record) = self.get_stored_connection(id)? {
-            // Try to decrypt, warn if fails
-            let decrypted_password = match crypto::decrypt_password(&record.password) {
-                Ok(decrypted) => decrypted,
-                Err(e) => {
-                    // This can happen if password was stored as plaintext (encryption failed previously)
-                    // or if the key was corrupted/lost
-                    eprintln!("WARNING: Password decryption failed: {}. This may indicate encryption issues.", e);
-                    record.password.clone()
-                }
-            };
+            let decrypted_password = crypto::decrypt_password(&record.password)?;
 
             Ok(Some(ConnectionWithPassword {
                 id: record.id,
@@ -317,10 +334,9 @@ impl Storage {
     }
 
     pub fn delete_connection(&self, id: &str) -> Result<bool, rusqlite::Error> {
-        let rows_affected = self.conn.execute(
-            "DELETE FROM connections WHERE id = ?",
-            params![id],
-        )?;
+        let rows_affected = self
+            .conn
+            .execute("DELETE FROM connections WHERE id = ?", params![id])?;
         Ok(rows_affected > 0)
     }
 }

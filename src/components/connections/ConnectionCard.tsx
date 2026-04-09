@@ -1,13 +1,35 @@
 import { Connection } from '@/types/connection';
+import { ConnectionRuntimeState } from '@/types/workspace';
+import { ConnectionCardActions } from './ConnectionCardActions';
+import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 import { EnvironmentBadge } from './EnvironmentBadge';
 
 interface ConnectionCardProps {
   connection: Connection;
+  runtimeState?: ConnectionRuntimeState;
+  isActiveSession?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onTestConnection?: () => void;
+  onRetryConnection?: () => void;
+  onEnterWorkspace?: () => void;
 }
 
-export function ConnectionCard({ connection, onEdit, onDelete }: ConnectionCardProps) {
+export function ConnectionCard({
+  connection,
+  runtimeState,
+  isActiveSession = false,
+  onEdit,
+  onDelete,
+  onTestConnection,
+  onRetryConnection,
+  onEnterWorkspace,
+}: ConnectionCardProps) {
+  const resolvedRuntimeState = runtimeState ?? {
+    connectionId: connection.id,
+    status: 'idle' as const,
+    detail: 'Ready to validate and open a workspace session.',
+  };
   const isProduction = connection.environment === 'production';
   const accentIcon = connection.db_type === 'postgresql' ? 'database' : 'dns';
   const accentColor = connection.db_type === 'postgresql' ? 'text-primary' : 'text-secondary';
@@ -23,7 +45,20 @@ export function ConnectionCard({ connection, onEdit, onDelete }: ConnectionCardP
       `}
     >
       <div className="flex items-start justify-between gap-4 mb-4">
-        <EnvironmentBadge environment={connection.environment} />
+        <div className="flex flex-wrap items-center gap-2">
+          <EnvironmentBadge environment={connection.environment} />
+          <ConnectionStatusBadge status={resolvedRuntimeState.status} />
+          {isActiveSession ? (
+            <span className="rounded-full border border-primary/20 bg-primary-container/15 px-2.5 py-1 text-[10px] font-label uppercase tracking-[0.18em] text-primary">
+              Active Session
+            </span>
+          ) : null}
+          {isProduction && resolvedRuntimeState.status === 'connected' ? (
+            <span className="rounded-full border border-error/20 bg-error-container/15 px-2.5 py-1 text-[10px] font-label uppercase tracking-[0.18em] text-error">
+              Read-Only On Entry
+            </span>
+          ) : null}
+        </div>
         <div className="flex gap-1">
           <button
             type="button"
@@ -94,18 +129,35 @@ export function ConnectionCard({ connection, onEdit, onDelete }: ConnectionCardP
         </div>
       ) : null}
 
-      <div className="mt-5 flex items-center justify-between border-t border-neutral-800/50 pt-4 text-xs">
-        <span className="font-label uppercase tracking-[0.18em] text-on-surface-variant">
-          Managed Connection
-        </span>
-        <button
-          type="button"
-          onClick={onEdit}
-          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 font-label uppercase tracking-[0.18em] text-primary transition-colors hover:bg-primary/10 hover:text-primary-dim"
-        >
-          Edit Details
-          <span className="material-symbols-outlined text-sm">arrow_forward</span>
-        </button>
+      <div className="mt-5 border-t border-neutral-800/50 pt-4">
+        <p className="text-sm text-on-surface-variant">{resolvedRuntimeState.detail}</p>
+        {resolvedRuntimeState.lastError ? (
+          <p className="mt-2 text-sm text-error">{resolvedRuntimeState.lastError}</p>
+        ) : null}
+
+        <div className="mt-4">
+          <ConnectionCardActions
+            runtimeState={resolvedRuntimeState}
+            isActiveSession={isActiveSession}
+            onTest={onTestConnection ?? (() => undefined)}
+            onRetry={onRetryConnection ?? (() => undefined)}
+            onEnterWorkspace={onEnterWorkspace ?? (() => undefined)}
+          />
+        </div>
+
+        <div className="mt-4 flex items-center justify-between text-xs">
+          <span className="font-label uppercase tracking-[0.18em] text-on-surface-variant">
+            Managed Connection
+          </span>
+          <button
+            type="button"
+            onClick={onEdit}
+            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 font-label uppercase tracking-[0.18em] text-primary transition-colors hover:bg-primary/10 hover:text-primary-dim"
+          >
+            Edit Details
+            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
       </div>
     </div>
   );

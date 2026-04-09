@@ -1,5 +1,5 @@
-use async_trait::async_trait;
 use crate::database::errors::Result;
+use async_trait::async_trait;
 
 /// Connection configuration for database connections
 #[derive(Debug, Clone)]

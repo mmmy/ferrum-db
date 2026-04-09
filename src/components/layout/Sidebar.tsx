@@ -1,11 +1,11 @@
 
-type NavItem = {
+export type NavItem = {
   name: string;
   icon: string;
   available: boolean;
 };
 
-const navigation: NavItem[] = [
+const defaultNavigation: NavItem[] = [
   { name: 'Connections', icon: 'hub', available: true },
   { name: 'SQL Editor', icon: 'terminal', available: false },
   { name: 'Data Browser', icon: 'table_rows', available: false },
@@ -16,9 +16,15 @@ const navigation: NavItem[] = [
 
 interface SidebarProps {
   activeItem?: string;
+  items?: NavItem[];
+  onSelect?: (itemName: string) => void;
 }
 
-export function Sidebar({ activeItem = 'Connections' }: SidebarProps) {
+export function Sidebar({
+  activeItem = 'Connections',
+  items = defaultNavigation,
+  onSelect,
+}: SidebarProps) {
   return (
     <aside className="w-64 bg-neutral-950 border-r border-neutral-800/50 flex flex-col h-full">
       {/* Logo Area */}
@@ -30,11 +36,16 @@ export function Sidebar({ activeItem = 'Connections' }: SidebarProps) {
       {/* Navigation Menu */}
       <nav className="flex-1 py-4 px-3">
         <ul className="space-y-1">
-          {navigation.map((item) => (
+          {items.map((item) => (
             <li key={item.name}>
               <button
                 type="button"
                 disabled={!item.available}
+                onClick={() => {
+                  if (item.available) {
+                    onSelect?.(item.name);
+                  }
+                }}
                 aria-current={activeItem === item.name ? 'page' : undefined}
                 className={`
                   w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-label border

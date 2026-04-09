@@ -2,6 +2,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConnectionCard } from '@/components/connections/ConnectionCard';
 import { sampleConnections } from '@/test/fixtures/connections';
+import { sampleConnectionStates } from '@/test/fixtures/workspace';
 import { renderWithProviders } from '@/test/render';
 
 describe('ConnectionCard', () => {
@@ -11,7 +12,12 @@ describe('ConnectionCard', () => {
     const onDelete = vi.fn();
 
     renderWithProviders(
-      <ConnectionCard connection={sampleConnections[0]} onEdit={onEdit} onDelete={onDelete} />
+      <ConnectionCard
+        connection={sampleConnections[0]}
+        runtimeState={sampleConnectionStates[sampleConnections[0].id]}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
     );
 
     await user.click(screen.getByText('Main Orders'));
@@ -22,6 +28,7 @@ describe('ConnectionCard', () => {
 
     await user.click(screen.getByRole('button', { name: /delete/i }));
     expect(onDelete).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('Execute')).not.toBeInTheDocument();
+    expect(screen.getByText('Connected')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /enter workspace/i })).toBeInTheDocument();
   });
 });

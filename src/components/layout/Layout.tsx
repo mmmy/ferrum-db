@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Sidebar } from './Sidebar';
+import { Sidebar, type NavItem } from './Sidebar';
 import { Header } from './Header';
 import { MainContent } from './MainContent';
 
@@ -9,6 +9,9 @@ interface LayoutProps {
   headerSubtitle?: string;
   headerActions?: ReactNode;
   activeNavItem?: string;
+  sidebarItems?: NavItem[];
+  onNavSelect?: (itemName: string) => void;
+  banner?: ReactNode;
 }
 
 export function Layout({
@@ -17,16 +20,20 @@ export function Layout({
   headerSubtitle = 'Local workspace shell',
   headerActions,
   activeNavItem = 'Connections',
+  sidebarItems,
+  onNavSelect,
+  banner,
 }: LayoutProps) {
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar activeItem={activeNavItem} />
+      <Sidebar activeItem={activeNavItem} items={sidebarItems} onSelect={onNavSelect} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header
           title={headerTitle}
           subtitle={headerSubtitle}
           actions={headerActions}
         />
+        {banner}
         <MainContent>{children}</MainContent>
       </div>
     </div>
@@ -34,5 +41,6 @@ export function Layout({
 }
 
 export { Sidebar } from './Sidebar';
+export type { NavItem } from './Sidebar';
 export { Header } from './Header';
 export { MainContent } from './MainContent';
