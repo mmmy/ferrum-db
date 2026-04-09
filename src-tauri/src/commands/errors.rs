@@ -54,6 +54,12 @@ impl CommandError {
         ))
     }
 
+    pub fn table_not_found(schema_name: &str, table_name: &str) -> Self {
+        Self::new("table_not_found", "Table not found").with_details(format!(
+            "Table `{schema_name}.{table_name}` does not exist"
+        ))
+    }
+
     pub fn unsupported_database(db_type: &str) -> Self {
         Self::new("unsupported_database", "Database type is not supported")
             .with_details(format!("Unsupported database type `{db_type}`"))

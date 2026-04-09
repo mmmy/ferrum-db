@@ -181,9 +181,7 @@ async fn get_mysql_table_preview(
     .map_err(|error| map_browser_error(error.to_string()))?;
 
     let Some(table_row) = table_row else {
-        return Err(CommandError::unknown(format!(
-            "Table `{schema_name}.{table_name}` does not exist"
-        )));
+        return Err(table_not_found_error(schema_name, table_name));
     };
 
     let table = TableDetails {
@@ -289,9 +287,7 @@ async fn get_postgres_table_preview(
     .map_err(|error| map_browser_error(error.to_string()))?;
 
     let Some(table_row) = table_row else {
-        return Err(CommandError::unknown(format!(
-            "Table `{schema_name}.{table_name}` does not exist"
-        )));
+        return Err(table_not_found_error(schema_name, table_name));
     };
 
     let table = TableDetails {
@@ -372,6 +368,10 @@ fn map_browser_error(message: String) -> CommandError {
     CommandError::classify_driver_message(message)
 }
 
+fn table_not_found_error(schema_name: &str, table_name: &str) -> CommandError {
+    CommandError::table_not_found(schema_name, table_name)
+}
+
 fn quote_mysql_identifier(identifier: &str) -> String {
     format!("`{}`", identifier.replace('`', "``"))
 }
@@ -388,7 +388,7 @@ fn escape_sql_string(value: &str) -> String {
 mod tests {
     use super::{
         escape_sql_string, quote_mysql_identifier, quote_postgres_identifier, sanitize_limit,
-        DEFAULT_PREVIEW_LIMIT, MAX_PREVIEW_LIMIT,
+        table_not_found_error, DEFAULT_PREVIEW_LIMIT, MAX_PREVIEW_LIMIT,
     };
 
     #[test]
@@ -407,5 +407,17 @@ mod tests {
         assert_eq!(quote_mysql_identifier("na`me"), "`na``me`");
         assert_eq!(quote_postgres_identifier("na\"me"), "\"na\"\"me\"");
         assert_eq!(escape_sql_string("o'hare"), "o''hare");
+    }
+
+    #[test]
+    fn missing_table_preview_errors_use_distinct_contract_code() {
+        let error = table_not_found_error("public", "missing_table");
+
+        assert_eq!(error.code, "table_not_found");
+        assert_eq!(error.message, "Table not found");
+        assert_eq!(
+            error.details.as_deref(),
+            Some("Table `public.missing_table` does not exist")
+        );
     }
 }
