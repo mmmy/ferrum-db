@@ -42,7 +42,8 @@ pub fn get_or_create_key() -> Result<[u8; 32], CryptoError> {
 
     // Try to retrieve existing key
     if let Ok(key_str) = entry.get_password() {
-        let key_bytes = BASE64.decode(&key_str)
+        let key_bytes = BASE64
+            .decode(&key_str)
             .map_err(|e| CryptoError::KeyringError(e.to_string()))?;
 
         if key_bytes.len() == 32 {
@@ -57,7 +58,8 @@ pub fn get_or_create_key() -> Result<[u8; 32], CryptoError> {
     let key = generate_key();
     let key_str = BASE64.encode(key);
 
-    entry.set_password(&key_str)
+    entry
+        .set_password(&key_str)
         .map_err(|e| CryptoError::KeyringError(e.to_string()))?;
 
     let _ = ENCRYPTION_KEY.set(key);
@@ -76,7 +78,8 @@ pub fn encrypt_password(plaintext: &str) -> Result<String, CryptoError> {
     let nonce = Nonce::from_slice(&nonce_bytes);
 
     // Encrypt
-    let ciphertext = cipher.encrypt(nonce, plaintext.as_bytes())
+    let ciphertext = cipher
+        .encrypt(nonce, plaintext.as_bytes())
         .map_err(|e| CryptoError::EncryptionFailed(e.to_string()))?;
 
     // Combine nonce + ciphertext and encode as base64
@@ -93,11 +96,14 @@ pub fn decrypt_password(ciphertext: &str) -> Result<String, CryptoError> {
         .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
 
     // Decode base64
-    let combined = BASE64.decode(ciphertext)
+    let combined = BASE64
+        .decode(ciphertext)
         .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
 
     if combined.len() < 12 {
-        return Err(CryptoError::DecryptionFailed("Invalid ciphertext".to_string()));
+        return Err(CryptoError::DecryptionFailed(
+            "Invalid ciphertext".to_string(),
+        ));
     }
 
     // Split nonce and ciphertext
@@ -105,11 +111,11 @@ pub fn decrypt_password(ciphertext: &str) -> Result<String, CryptoError> {
     let nonce = Nonce::from_slice(nonce_bytes);
 
     // Decrypt
-    let plaintext = cipher.decrypt(nonce, ciphertext_bytes)
+    let plaintext = cipher
+        .decrypt(nonce, ciphertext_bytes)
         .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))?;
 
-    String::from_utf8(plaintext)
-        .map_err(|e| CryptoError::DecryptionFailed(e.to_string()))
+    String::from_utf8(plaintext).map_err(|e| CryptoError::DecryptionFailed(e.to_string()))
 }
 
 #[cfg(test)]

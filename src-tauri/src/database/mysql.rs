@@ -13,10 +13,7 @@ pub struct MySQLConnection {
 
 impl MySQLConnection {
     pub fn new(config: ConnectionConfig) -> Self {
-        Self {
-            config,
-            pool: None,
-        }
+        Self { config, pool: None }
     }
 
     fn build_connect_options(&self) -> MySqlConnectOptions {
@@ -60,10 +57,7 @@ impl DatabaseConnection for MySQLConnection {
     async fn test_connection(&self) -> Result<bool> {
         if let Some(ref pool) = self.pool {
             let pool = pool.read().await;
-            match sqlx::query("SELECT 1")
-                .fetch_one(&*pool)
-                .await
-            {
+            match sqlx::query("SELECT 1").fetch_one(&*pool).await {
                 Ok(_) => Ok(true),
                 Err(_) => Ok(false),
             }

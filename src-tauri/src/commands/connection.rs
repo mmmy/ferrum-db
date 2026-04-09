@@ -3,20 +3,32 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::State;
 
-use crate::storage::{ConnectionConfig, CreateConnectionInput, Storage, UpdateConnectionInput, ConnectionWithPassword};
+use crate::database::runtime::DatabaseRuntime;
 use crate::database::ConnectionConfig as DbConfig;
+use crate::storage::{
+    ConnectionWithPassword, CreateConnectionInput, Storage, UpdateConnectionInput,
+};
 
-// Application state holding the storage
+use super::contracts::{ConnectionRecord, DeleteConnectionResult, TestConnectionResult};
+use super::errors::{CommandError, CommandResult};
+use super::session::SessionRegistry;
+
 pub struct AppState {
     pub storage: Mutex<Storage>,
+    pub sessions: Mutex<SessionRegistry>,
 }
 
 impl AppState {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let db_path = get_db_path()?;
+        Self::with_db_path(db_path)
+    }
+
+    pub fn with_db_path(db_path: PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
         let storage = Storage::new(db_path)?;
         Ok(Self {
             storage: Mutex::new(storage),
+            sessions: Mutex::new(SessionRegistry::default()),
         })
     }
 }
@@ -31,7 +43,6 @@ fn get_db_path() -> Result<PathBuf, Box<dyn std::error::Error>> {
     Ok(app_data.join("ferrum.db"))
 }
 
-// Re-export types for commands
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ConnectionData {
     pub name: String,
@@ -43,6 +54,15 @@ pub struct ConnectionData {
     pub database: Option<String>,
     pub environment: Option<String>,
     pub tags: Option<Vec<String>>,
+}
+
+pub(crate) struct LoadedSavedConnection {
+    pub id: String,
+    pub name: String,
+    pub db_type: String,
+    pub database: Option<String>,
+    pub environment: Option<String>,
+    pub runtime_config: DbConfig,
 }
 
 impl From<ConnectionData> for CreateConnectionInput {
@@ -69,7 +89,11 @@ impl From<ConnectionData> for UpdateConnectionInput {
             host: Some(data.host),
             port: Some(data.port),
             username: Some(data.username),
-            password: if data.password.is_empty() { None } else { Some(data.password) },
+            password: if data.password.is_empty() {
+                None
+            } else {
+                Some(data.password)
+            },
             database: data.database,
             environment: data.environment,
             tags: data.tags,
@@ -78,25 +102,54 @@ impl From<ConnectionData> for UpdateConnectionInput {
 }
 
 #[tauri::command]
-pub async fn list_connections(state: State<'_, AppState>) -> Result<Vec<ConnectionConfig>, String> {
-    let storage = state.storage.lock().map_err(|e| e.to_string())?;
-    storage.list_connections().map_err(|e| e.to_string())
+pub async fn list_connections(state: State<'_, AppState>) -> CommandResult<Vec<ConnectionRecord>> {
+    let storage = state
+        .storage
+        .lock()
+        .map_err(|error| CommandError::unknown(error.to_string()))?;
+
+    storage
+        .list_connections()
+        .map(|connections| {
+            connections
+                .into_iter()
+                .map(ConnectionRecord::from)
+                .collect()
+        })
+        .map_err(CommandError::from)
 }
 
 #[tauri::command]
-pub async fn get_connection(id: String, state: State<'_, AppState>) -> Result<Option<ConnectionConfig>, String> {
-    let storage = state.storage.lock().map_err(|e| e.to_string())?;
-    storage.get_connection(&id).map_err(|e| e.to_string())
+pub async fn get_connection(
+    id: String,
+    state: State<'_, AppState>,
+) -> CommandResult<Option<ConnectionRecord>> {
+    let storage = state
+        .storage
+        .lock()
+        .map_err(|error| CommandError::unknown(error.to_string()))?;
+
+    storage
+        .get_connection(&id)
+        .map(|connection| connection.map(ConnectionRecord::from))
+        .map_err(CommandError::from)
 }
 
 #[tauri::command]
 pub async fn create_connection(
     data: ConnectionData,
     state: State<'_, AppState>,
-) -> Result<ConnectionConfig, String> {
-    let storage = state.storage.lock().map_err(|e| e.to_string())?;
+) -> CommandResult<ConnectionRecord> {
+    let storage = state
+        .storage
+        .lock()
+        .map_err(|error| CommandError::unknown(error.to_string()))?;
     let input: CreateConnectionInput = data.into();
-    storage.create_connection(input).map_err(|e| e.to_string())
+
+    storage
+        .create_connection(input)
+        .map(ConnectionRecord::from)
+        .map_err(CommandError::from)
 }
 
 #[tauri::command]
@@ -104,110 +157,154 @@ pub async fn update_connection(
     id: String,
     data: ConnectionData,
     state: State<'_, AppState>,
-) -> Result<Option<ConnectionConfig>, String> {
-    let storage = state.storage.lock().map_err(|e| e.to_string())?;
+) -> CommandResult<Option<ConnectionRecord>> {
+    let storage = state
+        .storage
+        .lock()
+        .map_err(|error| CommandError::unknown(error.to_string()))?;
     let input: UpdateConnectionInput = data.into();
-    storage.update_connection(&id, input).map_err(|e| e.to_string())
+
+    storage
+        .update_connection(&id, input)
+        .map(|connection| connection.map(ConnectionRecord::from))
+        .map_err(CommandError::from)
 }
 
 #[tauri::command]
-pub async fn delete_connection(id: String, state: State<'_, AppState>) -> Result<(), String> {
-    let storage = state.storage.lock().map_err(|e| e.to_string())?;
-    storage.delete_connection(&id).map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-#[tauri::command]
-pub async fn test_connection(id: String, state: State<'_, AppState>) -> Result<bool, String> {
-    // Get data from storage synchronously first
-    let (db_type, host, port, username, password, database) = {
-        let storage = state.storage.lock().map_err(|e| e.to_string())?;
-        let conn_with_pwd: ConnectionWithPassword = storage.get_connection_with_password(&id)
-            .map_err(|e| e.to_string())?
-            .ok_or("Connection not found")?;
-
-        (
-            conn_with_pwd.db_type,
-            conn_with_pwd.host,
-            conn_with_pwd.port,
-            conn_with_pwd.username,
-            conn_with_pwd.password,
-            conn_with_pwd.database,
-        )
-    }; // storage lock is released here
-
-    // Now call async test function
-    test_db_connection(&db_type, host, port, username, password, database).await
-}
-
-async fn test_db_connection(
-    db_type: &str,
-    host: String,
-    port: i32,
-    username: String,
-    password: String,
-    database: Option<String>,
-) -> Result<bool, String> {
-    let db_config = DbConfig {
-        host,
-        port: port as u16,
-        username,
-        password,
-        database,
+pub async fn delete_connection(
+    id: String,
+    state: State<'_, AppState>,
+) -> CommandResult<DeleteConnectionResult> {
+    let deleted = {
+        let storage = state
+            .storage
+            .lock()
+            .map_err(|error| CommandError::unknown(error.to_string()))?;
+        storage.delete_connection(&id)?
     };
 
-    match db_type {
-        "mysql" => test_mysql_connection(db_config).await,
-        "postgresql" => test_postgres_connection(db_config).await,
-        _ => Err("Unsupported database type".to_string()),
+    if !deleted {
+        return Err(CommandError::connection_not_found(&id));
+    }
+
+    let invalidated_session = {
+        let mut sessions = state
+            .sessions
+            .lock()
+            .map_err(|error| CommandError::unknown(error.to_string()))?;
+        sessions.invalidate_by_connection(&id)
+    };
+
+    let invalidated_session_id = if let Some(session) = invalidated_session {
+        let session_id = session.payload.id.clone();
+        session.runtime.close().await;
+        Some(session_id)
+    } else {
+        None
+    };
+
+    Ok(DeleteConnectionResult {
+        deleted: true,
+        invalidated_session_id,
+    })
+}
+
+#[tauri::command]
+pub async fn test_connection(
+    connection_id: String,
+    state: State<'_, AppState>,
+) -> CommandResult<TestConnectionResult> {
+    let saved_connection = match load_saved_connection_for_runtime(&connection_id, &state).await {
+        Ok(connection) => connection,
+        Err(error) => return Ok(TestConnectionResult::failure(connection_id, error)),
+    };
+
+    match DatabaseRuntime::connect(&saved_connection.db_type, &saved_connection.runtime_config)
+        .await
+    {
+        Ok(runtime) => {
+            let version = runtime.get_version().await.ok();
+            runtime.close().await;
+
+            let message = version.map(|version| format!("Connection established ({version})"));
+            Ok(TestConnectionResult::success(saved_connection.id, message))
+        }
+        Err(error) => Ok(TestConnectionResult::failure(saved_connection.id, error)),
     }
 }
 
-#[allow(dead_code)]
-async fn test_mysql_connection(config: DbConfig) -> Result<bool, String> {
-    use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions};
+pub(crate) async fn load_saved_connection_for_runtime(
+    connection_id: &str,
+    state: &State<'_, AppState>,
+) -> CommandResult<LoadedSavedConnection> {
+    let connection = {
+        let storage = state
+            .storage
+            .lock()
+            .map_err(|error| CommandError::unknown(error.to_string()))?;
 
-    let mut options = MySqlConnectOptions::new()
-        .host(&config.host)
-        .port(config.port)
-        .username(&config.username)
-        .password(&config.password);
+        load_saved_connection_with_password(connection_id, &storage)?
+    };
 
-    if let Some(database) = config.database.as_deref() {
-        options = options.database(database);
-    }
-
-    match MySqlPoolOptions::new().max_connections(1).connect_with(options).await {
-        Ok(pool) => {
-            let result = sqlx::query("SELECT 1").fetch_one(&pool).await.is_ok();
-            pool.close().await;
-            Ok(result)
-        }
-        Err(e) => Err(e.to_string()),
-    }
+    Ok(connection)
 }
 
-#[allow(dead_code)]
-async fn test_postgres_connection(config: DbConfig) -> Result<bool, String> {
-    use sqlx::postgres::{PgConnectOptions, PgPoolOptions, PgSslMode};
+fn load_saved_connection_with_password(
+    connection_id: &str,
+    storage: &Storage,
+) -> CommandResult<LoadedSavedConnection> {
+    let saved: ConnectionWithPassword = storage
+        .get_connection_with_password(connection_id)?
+        .ok_or_else(|| CommandError::connection_not_found(connection_id))?;
 
-    let mut options = PgConnectOptions::new()
-        .host(&config.host)
-        .port(config.port)
-        .username(&config.username)
-        .password(&config.password)
-        .ssl_mode(PgSslMode::Prefer);
+    Ok(LoadedSavedConnection {
+        id: saved.id,
+        name: saved.name,
+        db_type: saved.db_type,
+        database: saved.database.clone(),
+        environment: saved.environment.clone(),
+        runtime_config: DbConfig {
+            host: saved.host,
+            port: saved.port as u16,
+            username: saved.username,
+            password: saved.password,
+            database: saved.database,
+        },
+    })
+}
 
-    if let Some(database) = config.database.as_deref() {
-        options = options.database(database);
-    }
+#[cfg(test)]
+mod tests {
+    use super::load_saved_connection_with_password;
+    use crate::storage::{CreateConnectionInput, Storage};
+    use uuid::Uuid;
 
-    match PgPoolOptions::new().max_connections(1).connect_with(options).await {
-        Ok(pool) => {
-            let result = sqlx::query("SELECT 1").fetch_one(&pool).await.is_ok();
-            pool.close().await;
-            Ok(result)
-        }
-        Err(e) => Err(e.to_string()),
+    #[test]
+    fn load_saved_connection_uses_decrypted_password() {
+        let db_path =
+            std::env::temp_dir().join(format!("ferrum-db-commands-{}.db", Uuid::new_v4()));
+        let storage = Storage::new(db_path.clone()).expect("storage should initialize");
+
+        let created = storage
+            .create_connection(CreateConnectionInput {
+                name: "Primary".to_string(),
+                db_type: "mysql".to_string(),
+                host: "localhost".to_string(),
+                port: 3306,
+                username: "root".to_string(),
+                password: "secret-pass".to_string(),
+                database: Some("app".to_string()),
+                environment: Some("development".to_string()),
+                tags: Some(vec!["local".to_string()]),
+            })
+            .expect("connection should be created");
+
+        let loaded = load_saved_connection_with_password(&created.id, &storage)
+            .expect("runtime connection should load");
+
+        assert_eq!(loaded.runtime_config.password, "secret-pass");
+
+        drop(storage);
+        let _ = std::fs::remove_file(db_path);
     }
 }

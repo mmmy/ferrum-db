@@ -1,11 +1,15 @@
 use tauri::Manager;
 
-pub mod storage;
+pub mod commands;
 pub mod crypto;
 pub mod database;
-pub mod commands;
+pub mod storage;
 
-use commands::{AppState, list_connections, get_connection, create_connection, update_connection, delete_connection, test_connection};
+use commands::{
+    close_connection_session, create_connection, delete_connection, get_connection,
+    get_session_overview, get_table_preview, list_connections, list_session_schemas,
+    open_connection_session, test_connection, update_connection, AppState,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,7 +24,12 @@ pub fn run() {
             create_connection,
             update_connection,
             delete_connection,
-            test_connection
+            test_connection,
+            open_connection_session,
+            close_connection_session,
+            get_session_overview,
+            list_session_schemas,
+            get_table_preview
         ])
         .setup(|app| {
             #[cfg(debug_assertions)]
