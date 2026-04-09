@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import { invokeBackend } from '@/backend/client';
 import { Connection, CreateConnectionInput, UpdateConnectionInput } from '@/types/connection';
-import { invoke } from '@tauri-apps/api/core';
 
 // State
 interface ConnectionsState {
@@ -72,7 +72,7 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
   const loadConnections = async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      const connections = await invoke<Connection[]>('list_connections');
+      const connections = await invokeBackend<Connection[]>('list_connections');
       dispatch({ type: 'SET_CONNECTIONS', payload: connections });
     } catch (error) {
       dispatch({ type: 'SET_LOAD_ERROR', payload: String(error) });
@@ -81,7 +81,7 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
 
   const createConnection = async (input: CreateConnectionInput) => {
     try {
-      const connection = await invoke<Connection>('create_connection', { data: input });
+      const connection = await invokeBackend<Connection>('create_connection', { data: input });
       dispatch({ type: 'ADD_CONNECTION', payload: connection });
     } catch (error) {
       throw error;
@@ -90,7 +90,7 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
 
   const updateConnection = async (id: string, input: UpdateConnectionInput) => {
     try {
-      const connection = await invoke<Connection | null>('update_connection', { id, data: input });
+      const connection = await invokeBackend<Connection | null>('update_connection', { id, data: input });
       if (connection) {
         dispatch({ type: 'UPDATE_CONNECTION', payload: connection });
         return;
@@ -104,7 +104,7 @@ export function ConnectionsProvider({ children }: { children: ReactNode }) {
 
   const deleteConnection = async (id: string) => {
     try {
-      await invoke('delete_connection', { id });
+      await invokeBackend('delete_connection', { id });
       dispatch({ type: 'DELETE_CONNECTION', payload: id });
     } catch (error) {
       throw error;

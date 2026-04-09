@@ -35,9 +35,21 @@ A cross-platform database management desktop application built with Tauri 2.x, R
 
 ```bash
 pnpm install           # Install dependencies
+pnpm run dev           # Browser-only frontend dev with mock backend adapter
 pnpm tauri dev         # Start development server
 pnpm tauri build       # Build for production
 ```
+
+### Frontend Mock Development
+
+- `pnpm run dev` runs the React app in a plain browser and uses the frontend backend adapter instead of Tauri IPC.
+- In dev mode without a Tauri runtime, frontend data access resolves through a backend adapter layer and then into a browser-side mock backend implementation.
+- Mock data is organized by domain and split by responsibility so it can scale with new features without collapsing into one large file.
+- The mock backend keeps seed data, state persistence, entity construction, and command handling separated.
+- Compatibility shims are acceptable when refactoring mock data internals, as long as the app-facing interface stays stable.
+- Mock state is persisted in browser `localStorage`, so manual CRUD testing survives refreshes.
+- `pnpm tauri dev` and production builds continue to use real Tauri commands by default.
+- Set `VITE_ENABLE_MOCK_BACKEND=true` to force mock mode, or `VITE_ENABLE_MOCK_BACKEND=false` to force real backend mode.
 
 ## Documented Solutions
 
